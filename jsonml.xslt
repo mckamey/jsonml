@@ -11,9 +11,7 @@
 		http://jsonml.org
 -->
 <xsl:stylesheet version="1.0"
-				xmlns:xsl="http://www.w3.org/1999/XSL/Transform"
-				xmlns:html="http://www.w3.org/1999/xhtml"
-				exclude-result-prefixes="html">
+				xmlns:xsl="http://www.w3.org/1999/XSL/Transform">
 
 	<xsl:output method="text"
 				media-type="application/json"
@@ -21,12 +19,12 @@
 				indent="no"
 				omit-xml-declaration="yes" />
 
-	<!-- Constants -->
-	<xsl:variable name="START_ELEM"
-				  select="'['" />
-
+	<!-- constants -->
 	<xsl:variable name="XHTML"
 				  select="'http://www.w3.org/1999/xhtml'" />
+
+	<xsl:variable name="START_ELEM"
+				  select="'['" />
 
 	<xsl:variable name="END_ELEM"
 				  select="']'" />
@@ -54,25 +52,20 @@
 		</xsl:call-template>
 	</xsl:template>
 
-	<!-- attribute -->
+	<!-- attributes -->
 	<xsl:template match="@*">
-		<xsl:value-of select="$STRING_DELIM"
-					  disable-output-escaping="yes"/>
+		<xsl:value-of select="$STRING_DELIM" />
 		<xsl:choose>
 			<xsl:when test="namespace-uri()=$XHTML">
-				<xsl:value-of select="local-name()"
-							  disable-output-escaping="yes"/>
+				<xsl:value-of select="local-name()" />
 			</xsl:when>
 			<xsl:otherwise>
-				<xsl:value-of select="name()"
-							  disable-output-escaping="yes"/>
+				<xsl:value-of select="name()" />
 			</xsl:otherwise>
 		</xsl:choose>
-		<xsl:value-of select="$STRING_DELIM"
-					  disable-output-escaping="yes"/>
+		<xsl:value-of select="$STRING_DELIM" />
 
-		<xsl:value-of select="$NAME_DELIM"
-					  disable-output-escaping="yes"/>
+		<xsl:value-of select="$NAME_DELIM" />
 
 		<xsl:call-template name="escape-string">
 			<xsl:with-param name="value"
@@ -81,67 +74,54 @@
 
 	</xsl:template>
 
-	<!-- element -->
+	<!-- elements -->
 	<xsl:template match="*">
-		<xsl:value-of select="$START_ELEM"
-					  disable-output-escaping="yes"/>
+		<xsl:value-of select="$START_ELEM" />
 
 		<!-- tag-name string -->
-		<xsl:value-of select="$STRING_DELIM"
-					  disable-output-escaping="yes"/>
+		<xsl:value-of select="$STRING_DELIM" />
 		<xsl:choose>
 			<xsl:when test="namespace-uri()=$XHTML">
-				<xsl:value-of select="local-name()"
-							  disable-output-escaping="yes"/>
+				<xsl:value-of select="local-name()" />
 			</xsl:when>
 			<xsl:otherwise>
-				<xsl:value-of select="name()"
-							  disable-output-escaping="yes"/>
+				<xsl:value-of select="name()" />
 			</xsl:otherwise>
 		</xsl:choose>
-		<xsl:value-of select="$STRING_DELIM"
-					  disable-output-escaping="yes"/>
+		<xsl:value-of select="$STRING_DELIM" />
 
 		<!-- attribute object -->
 		<xsl:if test="count(@*)>0">
-			<xsl:value-of select="$VALUE_DELIM"
-						  disable-output-escaping="yes"/>
-			<xsl:value-of select="$START_ATTRIB"
-						  disable-output-escaping="yes"/>
+			<xsl:value-of select="$VALUE_DELIM" />
+			<xsl:value-of select="$START_ATTRIB" />
 			<xsl:for-each select="@*">
 				<xsl:if test="position()>1">
-					<xsl:value-of select="$VALUE_DELIM"
-								  disable-output-escaping="yes"/>
+					<xsl:value-of select="$VALUE_DELIM" />
 				</xsl:if>
 				<xsl:apply-templates select="." />
 			</xsl:for-each>
-			<xsl:value-of select="$END_ATTRIB"
-						  disable-output-escaping="yes"/>
+			<xsl:value-of select="$END_ATTRIB" />
 		</xsl:if>
 
 		<!-- child elements and text-nodes -->
 		<xsl:if test="count(./*)+count(./text())>0">
-			<xsl:value-of select="$VALUE_DELIM"
-						  disable-output-escaping="yes"/>
+			<xsl:value-of select="$VALUE_DELIM" />
 			<xsl:for-each select="./*|./text()">
 				<xsl:if test="position()>1">
-					<xsl:value-of select="$VALUE_DELIM"
-								  disable-output-escaping="yes"/>
+					<xsl:value-of select="$VALUE_DELIM" />
 				</xsl:if>
 				<xsl:apply-templates select="." />
 			</xsl:for-each>
 		</xsl:if>
 
-		<xsl:value-of select="$END_ELEM"
-					  disable-output-escaping="yes"/>
+		<xsl:value-of select="$END_ELEM" />
 	</xsl:template>
 
 	<!-- escape-string: quotes and escapes -->
 	<xsl:template name="escape-string">
 		<xsl:param name="value" />
 
-		<xsl:value-of select="$STRING_DELIM"
-					  disable-output-escaping="yes"/>
+		<xsl:value-of select="$STRING_DELIM" />
 
 		<xsl:if test="string-length($value)>0">
 			<xsl:variable name="escaped-whacks">
@@ -203,8 +183,7 @@
 			</xsl:call-template>
 		</xsl:if>
 
-		<xsl:value-of select="$STRING_DELIM"
-					  disable-output-escaping="yes"/>
+		<xsl:value-of select="$STRING_DELIM" />
 	</xsl:template>
 
 	<!-- string-replace: replaces occurances of one string with another -->
