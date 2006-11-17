@@ -14,7 +14,7 @@
             This method parses a JSON text to produce a tree of
             DOM elements.
 
-    http://jsonml.org
+    http://jsonml.org/License.htm
 */
 
 Array.prototype.parseJsonML = function () {

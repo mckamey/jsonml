@@ -1,14 +1,15 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <!--
 		JsonML.xsl
-		2006-11-15
+		2006-11-16
 
 		This transformation converts any XML document into JsonML.
-		It omits comment-nodes, processing-instructions, and the
-		prefix for "http://www.w3.org/1999/xhtml" namespace since
-		the assumption is that this for use with a web browser.
+		It omits processing-instructions and comment-nodes.
+		
+		To enable comment-nodes to be emitted as JavaScript comments,
+		uncomment the Comment() template.
 
-		http://jsonml.org
+		http://jsonml.org/License.htm
 -->
 <xsl:stylesheet version="1.0"
 				xmlns:xsl="http://www.w3.org/1999/XSL/Transform">
@@ -44,8 +45,33 @@
 	<xsl:variable name="STRING_DELIM"
 				  select="'&quot;'" />
 
+	<xsl:variable name="START_COMMENT"
+				  select="'/*'" />
+
+	<xsl:variable name="END_COMMENT"
+				  select="'*/'" />
+
+	<!-- root-node -->
+	<xsl:template match="/">
+		<xsl:apply-templates select="*" />
+	</xsl:template>
+
+	<!-- comments -->
+	<xsl:template match="comment()">
+	<!-- uncomment to support JSON comments -->
+	<!--
+		<xsl:value-of select="$START_COMMENT" />
+
+		<xsl:value-of select="."
+					  disable-output-escaping="yes" />
+
+		<xsl:value-of select="$END_COMMENT" />
+	-->
+	</xsl:template>
+
 	<!-- text-nodes -->
 	<xsl:template match="text()">
+		<xsl:value-of select="$VALUE_DELIM" />
 		<xsl:call-template name="escape-string">
 			<xsl:with-param name="value"
 							select="." />
@@ -76,6 +102,9 @@
 
 	<!-- elements -->
 	<xsl:template match="*">
+		<xsl:if test="not(.=/*[position()=1])">
+			<xsl:value-of select="$VALUE_DELIM" />
+		</xsl:if>
 		<xsl:value-of select="$START_ELEM" />
 
 		<!-- tag-name string -->
@@ -104,15 +133,9 @@
 		</xsl:if>
 
 		<!-- child elements and text-nodes -->
-		<xsl:if test="count(./*)+count(./text())>0">
-			<xsl:value-of select="$VALUE_DELIM" />
-			<xsl:for-each select="./*|./text()">
-				<xsl:if test="position()>1">
-					<xsl:value-of select="$VALUE_DELIM" />
-				</xsl:if>
-				<xsl:apply-templates select="." />
-			</xsl:for-each>
-		</xsl:if>
+		<xsl:for-each select="*|text()|comment()">
+			<xsl:apply-templates select="." />
+		</xsl:for-each>
 
 		<xsl:value-of select="$END_ELEM" />
 	</xsl:template>
