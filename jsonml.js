@@ -55,7 +55,7 @@ Array.prototype.parseJsonML = function () {
 					}
 				}
 			} else if (an == "class") {
-				el.setAttribute("className", a[an]);
+				el.className = a[an];
 			} else {
 				el.setAttribute(an, a[an]);
 			}
