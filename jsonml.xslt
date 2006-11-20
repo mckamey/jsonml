@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <!--
 		JsonML.xsl
-		2006-11-16
+		2006-11-19
 
 		This transformation converts any XML document into JsonML.
 		It omits processing-instructions and comment-nodes.
@@ -69,37 +69,6 @@
 	-->
 	</xsl:template>
 
-	<!-- text-nodes -->
-	<xsl:template match="text()">
-		<xsl:value-of select="$VALUE_DELIM" />
-		<xsl:call-template name="escape-string">
-			<xsl:with-param name="value"
-							select="." />
-		</xsl:call-template>
-	</xsl:template>
-
-	<!-- attributes -->
-	<xsl:template match="@*">
-		<xsl:value-of select="$STRING_DELIM" />
-		<xsl:choose>
-			<xsl:when test="namespace-uri()=$XHTML">
-				<xsl:value-of select="local-name()" />
-			</xsl:when>
-			<xsl:otherwise>
-				<xsl:value-of select="name()" />
-			</xsl:otherwise>
-		</xsl:choose>
-		<xsl:value-of select="$STRING_DELIM" />
-
-		<xsl:value-of select="$NAME_DELIM" />
-
-		<xsl:call-template name="escape-string">
-			<xsl:with-param name="value"
-							select="." />
-		</xsl:call-template>
-
-	</xsl:template>
-
 	<!-- elements -->
 	<xsl:template match="*">
 		<xsl:if test="not(.=/*[position()=1])">
@@ -138,6 +107,37 @@
 		</xsl:for-each>
 
 		<xsl:value-of select="$END_ELEM" />
+	</xsl:template>
+
+	<!-- text-nodes -->
+	<xsl:template match="text()">
+		<xsl:value-of select="$VALUE_DELIM" />
+		<xsl:call-template name="escape-string">
+			<xsl:with-param name="value"
+							select="." />
+		</xsl:call-template>
+	</xsl:template>
+
+	<!-- attributes -->
+	<xsl:template match="@*">
+		<xsl:value-of select="$STRING_DELIM" />
+		<xsl:choose>
+			<xsl:when test="namespace-uri()=$XHTML">
+				<xsl:value-of select="local-name()" />
+			</xsl:when>
+			<xsl:otherwise>
+				<xsl:value-of select="name()" />
+			</xsl:otherwise>
+		</xsl:choose>
+		<xsl:value-of select="$STRING_DELIM" />
+
+		<xsl:value-of select="$NAME_DELIM" />
+
+		<xsl:call-template name="escape-string">
+			<xsl:with-param name="value"
+							select="." />
+		</xsl:call-template>
+
 	</xsl:template>
 
 	<!-- escape-string: quotes and escapes -->
