@@ -25,10 +25,10 @@ Array.prototype.parseJsonML = function () {
 	/*void*/ function aa(/*element*/ el, /*object*/ a) {
 		// foreach attributeName
 		for (var an in a) {
-			if (typeof(a[an]) != "string") {
+			if (typeof(a[an]) !== "string") {
 				continue;
 			}
-			if (an == "style") {
+			if (an === "style") {
 				var s = a[an];// styles
 				s = s.split(";");
 				for (var i=0; i<s.length; i++) {
@@ -39,7 +39,7 @@ Array.prototype.parseJsonML = function () {
 						var n = RegExp.$1; // style property
 						var v = RegExp.$2; // style value
 						if (n && v) {
-							if (n == "float") {
+							if (n === "float") {
 								n = "styleFloat";
 							} else {
 								// convert property name to camelCase
@@ -54,7 +54,7 @@ Array.prototype.parseJsonML = function () {
 						}
 					}
 				}
-			} else if (an == "class") {
+			} else if (an === "class") {
 				el.className = a[an];
 			} else {
 				el.setAttribute(an, a[an]);
@@ -65,10 +65,10 @@ Array.prototype.parseJsonML = function () {
 	//appendChild
 	/*void*/ function ac(/*element*/ el, /*array or string*/ c) {
 		if (c) {
-			if (el.tagName.toLowerCase() == "table" && el.tBodies) {
+			if (el.tagName.toLowerCase() === "table" && el.tBodies) {
 				// in IE must explicitly nest TDs in TBODY
 				var ct = c.tagName ? c.tagName.toLowerCase() : null;// child tagName
-				if (ct && ct!="tbody" && ct!="thead") {
+				if (ct && ct!=="tbody" && ct!=="thead") {
 					// insert in last tbody
 					var tb = el.tBodies.length>0 ? el.tBodies[el.tBodies.length-1] : null;// tBody
 					if (!tb) {
@@ -88,28 +88,28 @@ Array.prototype.parseJsonML = function () {
 		if (!jml) {
 			return null;
 		}
-		if (typeof(jml) == "string") {
+		if (typeof(jml) === "string") {
 			return document.createTextNode(jml);
 		}
 
-		if (!(jml instanceof Array) || jml.length < 1 || typeof(jml[0]) != "string") {
+		if (!(jml instanceof Array) || jml.length < 1 || typeof(jml[0]) !== "string") {
 			throw new Error("parseJsonML");
 		}
 
 		var t = jml[0]; // tagName
-		var x = (t.toLowerCase() == "script"); // check for scripts
+		var x = (t.toLowerCase() === "script"); // check for scripts
 		var el = x ? null : document.createElement(t);
 
 		for (var i=1; i<jml.length; i++) {
 			if (!x) {
-				if (jml[i] instanceof Array || typeof(jml[i]) == "string") {
+				if (jml[i] instanceof Array || typeof(jml[i]) === "string") {
 					// append children
 					ac(el, p(jml[i]));
-				} else if (typeof(jml[i]) == "object") {
+				} else if (typeof(jml[i]) === "object") {
 					// add attributes
 					aa(el, jml[i]);
 				}
-			//} else if (typeof(jml[i]) == "string") {
+			//} else if (typeof(jml[i]) === "string") {
 				/*	JSLint: "eval is evil"
 					uncomment at your own risk, executes script elements */
 				//eval(jml[i]);
@@ -123,6 +123,10 @@ Array.prototype.parseJsonML = function () {
 };
 
 String.prototype.parseJsonML = function () {
-	var jml = this.parseJSON();
-	return (jml instanceof Array) ? jml.p() : null;
+	try {
+		var jml = this.parseJSON();
+		return (jml instanceof Array) ? jml.p() : null;
+	} catch (ex) {
+		return null;
+	}
 };
