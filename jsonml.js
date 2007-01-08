@@ -21,6 +21,14 @@ Array.prototype.parseJsonML = function () {
 
 	var re = /^\s*(\s*?[\w-]+)\s*[:]\s*(.+?)\s*$/;// styles regex
 
+	//attribute name mapping
+	var am = {
+		"class" : "className",
+		"tabindex" : "tabIndex",
+		"accesskey" : "accessKey",
+		"hidefocus" : "hideFocus"
+	};
+
 	//addAttributes
 	/*void*/ function aa(/*element*/ el, /*object*/ a) {
 		// foreach attributeName
@@ -28,49 +36,36 @@ Array.prototype.parseJsonML = function () {
 			if (!an || typeof(a[an]) !== "string") {
 				continue;
 			}
-			switch(an.toLowerCase()) {
-				case "style":
-					var s = a[an];// styles
-					s = s.split(";");
-					for (var i=0; i<s.length; i++) {
-						if (!s[i]) {
-							continue;
-						}
-						if (s[i].match(re)) {
-							var n = RegExp.$1; // style property
-							var v = RegExp.$2; // style value
-							if (n && v) {
-								if (n === "float") {
-									n = "styleFloat";
-								} else {
-									// convert property name to camelCase
-									n = n.split('-');
-									n[0] = n[0].toLowerCase();
-									for (var j=1; j<n.length; j++) {
-										n[j] = n[j].charAt(0).toUpperCase()+n[j].substr(1).toLowerCase();
-									}
-									n = n.join("");
+			if (an.toLowerCase() === "style") {
+				var s = a[an];// styles
+				s = s.split(";");
+				for (var i=0; i<s.length; i++) {
+					if (!s[i]) {
+						continue;
+					}
+					if (s[i].match(re)) {
+						var n = RegExp.$1; // style property
+						var v = RegExp.$2; // style value
+						if (n && v) {
+							if (n === "float") {
+								n = "styleFloat";
+							} else {
+								// convert property name to camelCase
+								n = n.split('-');
+								n[0] = n[0].toLowerCase();
+								for (var j=1; j<n.length; j++) {
+									n[j] = n[j].charAt(0).toUpperCase()+n[j].substr(1).toLowerCase();
 								}
-								el.style[n] = v;
+								n = n.join("");
 							}
+							el.style[n] = v;
 						}
 					}
-					break;
-				case "class":
-					el.className = a[an];
-					break;
-				case "tabindex":
-					el.tabIndex = a[an];
-					break;
-				case "accesskey":
-					el.accessKey = a[an];
-					break;
-				case "hidefocus":
-					el.hideFocus = a[an];
-					break;
-				default:
-					el.setAttribute(an, a[an]);
-					break;
+				}
+			} else if (am[an.toLowerCase()]) {
+				el.setAttribute(am[an.toLowerCase()], a[an]);
+			} else {
+				el.setAttribute(an, a[an]);
 			}
 		}
 	}
