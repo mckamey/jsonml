@@ -1,6 +1,6 @@
 ﻿/*
     JsonML.js
-    2006-11-12
+    2007-01-07
 
     This file adds these methods to JavaScript:
 
@@ -25,39 +25,52 @@ Array.prototype.parseJsonML = function () {
 	/*void*/ function aa(/*element*/ el, /*object*/ a) {
 		// foreach attributeName
 		for (var an in a) {
-			if (typeof(a[an]) !== "string") {
+			if (!an || typeof(a[an]) !== "string") {
 				continue;
 			}
-			if (an === "style") {
-				var s = a[an];// styles
-				s = s.split(";");
-				for (var i=0; i<s.length; i++) {
-					if (!s[i]) {
-						continue;
-					}
-					if (s[i].match(re)) {
-						var n = RegExp.$1; // style property
-						var v = RegExp.$2; // style value
-						if (n && v) {
-							if (n === "float") {
-								n = "styleFloat";
-							} else {
-								// convert property name to camelCase
-								n = n.split('-');
-								n[0] = n[0].toLowerCase();
-								for (var j=1; j<n.length; j++) {
-									n[j] = n[j].charAt(0).toUpperCase()+n[j].substr(1).toLowerCase();
+			switch(an.toLowerCase()) {
+				case "style":
+					var s = a[an];// styles
+					s = s.split(";");
+					for (var i=0; i<s.length; i++) {
+						if (!s[i]) {
+							continue;
+						}
+						if (s[i].match(re)) {
+							var n = RegExp.$1; // style property
+							var v = RegExp.$2; // style value
+							if (n && v) {
+								if (n === "float") {
+									n = "styleFloat";
+								} else {
+									// convert property name to camelCase
+									n = n.split('-');
+									n[0] = n[0].toLowerCase();
+									for (var j=1; j<n.length; j++) {
+										n[j] = n[j].charAt(0).toUpperCase()+n[j].substr(1).toLowerCase();
+									}
+									n = n.join("");
 								}
-								n = n.join("");
+								el.style[n] = v;
 							}
-							el.style[n] = v;
 						}
 					}
-				}
-			} else if (an === "class") {
-				el.className = a[an];
-			} else {
-				el.setAttribute(an, a[an]);
+					break;
+				case "class":
+					el.className = a[an];
+					break;
+				case "tabindex":
+					el.tabIndex = a[an];
+					break;
+				case "accesskey":
+					el.accessKey = a[an];
+					break;
+				case "hidefocus":
+					el.hideFocus = a[an];
+					break;
+				default:
+					el.setAttribute(an, a[an]);
+					break;
 			}
 		}
 	}
