@@ -120,7 +120,7 @@ Array.prototype.parseJsonML = function () {
 			//} else if (typeof(jml[i]) === "string") {
 				/*	JSLint: "eval is evil"
 					uncomment at your own risk, executes script elements */
-				//eval(jml[i]);
+				//eval( "(" + jml[i] + ")" );
 			}
 		}
 
