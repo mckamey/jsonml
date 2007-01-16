@@ -1,6 +1,6 @@
 ﻿/*
     JsonML.js
-    2007-01-07
+    2007-01-15
 
     This file adds these methods to JavaScript:
 
