@@ -23,7 +23,6 @@ Array.prototype.parseJsonML = function () {
 
 	//attribute name mapping
 	var am = {
-		"class" : "className",
 		"tabindex" : "tabIndex",
 		"accesskey" : "accessKey",
 		"hidefocus" : "hideFocus"
@@ -62,6 +61,8 @@ Array.prototype.parseJsonML = function () {
 						}
 					}
 				}
+			} else if (an.toLowerCase() === "class") {
+				el.className = a[an];
 			} else if (am[an.toLowerCase()]) {
 				el.setAttribute(am[an.toLowerCase()], a[an]);
 			} else {
