@@ -1,23 +1,44 @@
 ﻿/*
     JsonML.js
-    2007-01-15
+    2007-01-21
+    http://jsonml.org/License.htm
 
     This file adds these methods to JavaScript:
 
-        array.parseJsonML()
+        string.parseJsonML(filter)
 
-            This method produces a JSON text from an array. The
+            This method produces a tree of DOM elements from a (JSON text) JsonML tree.
+
+        array.parseJsonML(filter)
+
+            This method produces a tree of DOM elements from a JsonML tree. The
             array must not contain any cyclical references.
 
-        string.parseJsonML()
+            The optional filter parameter is a function which can filter and
+            transform the results. It receives each of the DOM nodes, and
+            its return value is used instead of the original value. If it
+            returns what it received, then structure is not modified. If it
+            returns undefined then the member is deleted.
 
-            This method parses a JSON text to produce a tree of
-            DOM elements.
+			This is useful for binding unobtrusive JavaScript to the generated
+			DOM elements.
 
-    http://jsonml.org/License.htm
+            Example:
+
+            // Parse the structure. If an element has a specific CSS value then
+            // attach appropriate .
+
+            myData = myUI.parseJsonML(function (elem) {
+				if (elem.className.indexOf("RemoveMe")) {
+					return undefined;
+				} else if (elem.className.indexOf("ExternalLink")) {
+					elem.onclick = function(evt) { window.open(elem.href); return false; };
+				}
+                return elem;
+            });
 */
 
-Array.prototype.parseJsonML = function () {
+/*element*/ Array.prototype.parseJsonML = function (/*function(element)*/ filter) {
 
 	var re = /^\s*(\s*?[\w-]+)\s*[:]\s*(.+?)\s*$/;// styles regex
 
@@ -125,17 +146,17 @@ Array.prototype.parseJsonML = function () {
 			}
 		}
 
-		return el;
+		return (el && filter) ? filter(el) : el;
 	}
 
 	return p(this);
 };
 
-String.prototype.parseJsonML = function () {
+/*element*/ String.prototype.parseJsonML = function (/*function(element)*/ filter) {
 	try {
 		var jml = this.parseJSON();
-		return (jml instanceof Array) ? jml.p() : null;
 	} catch (ex) {
 		return null;
 	}
+	return (jml instanceof Array) ? jml.parseJsonML(filter) : null;
 };
