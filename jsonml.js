@@ -29,9 +29,9 @@
             // attach appropriate .
 
             myData = myUI.parseJsonML(function (elem) {
-				if (elem.className.indexOf("RemoveMe")) {
+				if (elem.className.indexOf("RemoveMe") >= 0) {
 					return undefined;
-				} else if (elem.className.indexOf("ExternalLink")) {
+				} else if (elem.className.indexOf("ExternalLink") >= 0) {
 					elem.onclick = function(evt) { window.open(elem.href); return false; };
 				}
                 return elem;
