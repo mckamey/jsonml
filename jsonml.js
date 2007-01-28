@@ -1,7 +1,11 @@
-﻿/*
-    JsonML.js
-    2007-01-21
-    http://jsonml.org/License.htm
+/*
+	JsonML.js
+
+	Created: 2006-11-09-0116
+	Modified: 2007-01-26-1224
+
+	Released under a BSD-style license:
+	http://jsonml.org/License.htm
 
     This file adds these methods to JavaScript:
 
@@ -25,22 +29,35 @@
 
             Example:
 
-            // Parse the structure. If an element has a specific CSS value then
-            // attach appropriate .
+            // Parses the structure. If an element has a specific CSS value then
+            // takes appropriate action: Remove from results, add special event
+            // handlers, or bind to a custom component.
 
-            myData = myUI.parseJsonML(function (elem) {
+            var myUI = myUITemplate.parseJsonML(function (elem) {
 				if (elem.className.indexOf("RemoveMe") >= 0) {
+					// this will remove from resulting DOM tree
 					return undefined;
-				} else if (elem.className.indexOf("ExternalLink") >= 0) {
-					elem.onclick = function(evt) { window.open(elem.href); return false; };
+				}
+
+				if (elem.tagName === "a" &&
+					elem.className.indexOf("ExternalLink") >= 0) {
+					// this is the equivalent of target="_blank"
+					elem.onclick = function(evt) {
+						window.open(elem.href); return false;
+					};
+
+				} else if (elem.className.indexOf("FancyWidgit") >= 0) {
+					// bind to a custom component
+					FancyWidgit.bindDOM(elem);
 				}
                 return elem;
             });
+
 */
 
-/*element*/ Array.prototype.parseJsonML = function (/*function(element)*/ filter) {
+/*element*/ Array.prototype.parseJsonML = function (/*element function(element)*/ filter) {
 
-	var re = /^\s*(\s*?[\w-]+)\s*[:]\s*(.+?)\s*$/;// styles regex
+	var re = /^\s*(\s*?[\w-]+)\s*[:]\s*(.+?)\s*$/;// styles Regexp
 
 	//attribute name mapping
 	var am = {
@@ -50,8 +67,8 @@
 	};
 
 	//addAttributes
-	/*void*/ function aa(/*element*/ el, /*object*/ a) {
-		// foreach attributeName
+	/*void*/ function aa(/*element*/ el, /*Object*/ a) {
+		// for each attributeName
 		for (var an in a) {
 			if (!an || typeof(a[an]) !== "string") {
 				continue;
@@ -93,7 +110,7 @@
 	}
 
 	//appendChild
-	/*void*/ function ac(/*element*/ el, /*array or string*/ c) {
+	/*void*/ function ac(/*element*/ el, /*Array or String*/ c) {
 		if (c) {
 			if (el.tagName.toLowerCase() === "table" && el.tBodies) {
 				// in IE must explicitly nest TDs in TBODY
