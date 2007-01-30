@@ -2,7 +2,7 @@
 	JsonML.js
 
 	Created: 2006-11-09-0116
-	Modified: 2007-01-26-1224
+	Modified: 2007-01-29-2154
 
 	Released under a BSD-style license:
 	http://jsonml.org/License.htm
@@ -57,7 +57,7 @@
 
 /*element*/ Array.prototype.parseJsonML = function (/*element function(element)*/ filter) {
 
-	var re = /^\s*(\s*?[\w-]+)\s*[:]\s*(.+?)\s*$/;// styles Regexp
+	var re = /^\s*([a-zA-Z-]+[\w-]*)\s*[:]\s*((\S+\s*\S+)+)\s*$/;// styles RegExp
 
 	//attribute name mapping
 	var am = {
