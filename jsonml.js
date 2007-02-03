@@ -34,19 +34,19 @@
             // handlers, or bind to a custom component.
 
             var myUI = myUITemplate.parseJsonML(function (elem) {
-				if (elem.className.indexOf("RemoveMe") >= 0) {
+				if (elem.className.indexOf("Remove-Me") >= 0) {
 					// this will remove from resulting DOM tree
 					return undefined;
 				}
 
-				if (elem.tagName === "a" &&
-					elem.className.indexOf("ExternalLink") >= 0) {
+				if (elem.tagName && elem.tagName.toLowerCase() === "a" &&
+					elem.className.indexOf("External-Link") >= 0) {
 					// this is the equivalent of target="_blank"
 					elem.onclick = function(evt) {
 						window.open(elem.href); return false;
 					};
 
-				} else if (elem.className.indexOf("FancyWidgit") >= 0) {
+				} else if (elem.className.indexOf("Fancy-Widgit") >= 0) {
 					// bind to a custom component
 					FancyWidgit.bindDOM(elem);
 				}
