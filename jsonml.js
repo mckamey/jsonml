@@ -4,7 +4,7 @@
 	Created: 2006-11-09-0116
 	Modified: 2007-01-29-2154
 
-	Released under a BSD-style license:
+	Released under a BSD-style open-source license:
 	http://jsonml.org/License.htm
 
     This file adds these methods to JavaScript:
@@ -50,8 +50,8 @@
 					// bind to a custom component
 					FancyWidgit.bindDOM(elem);
 				}
-                return elem;
-            });
+				return elem;
+			});
 
 */
 
