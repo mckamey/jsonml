@@ -1,15 +1,18 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <!--
 		JsonML.xsl
-		2006-11-19
+
+		Created: 2006-11-15-0551
+		Modified: 2006-11-19-1705
+
+		Released under a BSD-style open-source license:
+		http://jsonml.org/License.htm
 
 		This transformation converts any XML document into JsonML.
 		It omits processing-instructions and comment-nodes.
 		
 		To enable comment-nodes to be emitted as JavaScript comments,
 		uncomment the Comment() template.
-
-		http://jsonml.org/License.htm
 -->
 <xsl:stylesheet version="1.0"
 				xmlns:xsl="http://www.w3.org/1999/XSL/Transform">
