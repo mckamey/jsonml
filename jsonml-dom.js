@@ -1,7 +1,7 @@
 ﻿/*
 	Dom2JsonML.js
 
-	Created: 2007-02-15-
+	Created: 2007-02-15-2235
 
 	Released under a BSD-style open-source license:
 	http://jsonml.org/License.htm
