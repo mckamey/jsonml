@@ -2,7 +2,7 @@
 	JsonML.js
 
 	Created: 2006-11-09-0116
-	Modified: 2007-01-29-2154
+	Modified: 2007-02-15-2026
 
 	Released under a BSD-style open-source license:
 	http://jsonml.org/License.htm
@@ -84,8 +84,8 @@
 						var n = RegExp.$1; // style property
 						var v = RegExp.$2; // style value
 						if (n && v) {
-							if (n === "float") {
-								n = "styleFloat";
+							if (n.toLowerCase() === "float") {
+								n = ("undefined" == typeof el.style.styleFloat) ? "cssFloat" : "styleFloat";
 							} else {
 								// convert property name to camelCase
 								n = n.split('-');
