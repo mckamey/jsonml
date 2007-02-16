@@ -57,8 +57,6 @@
 
 /*element*/ Array.prototype.parseJsonML = function (/*element function(element)*/ filter) {
 
-//	var re = /^\s*([a-zA-Z-]+[\w-]*)\s*[:]\s*((\S+\s*\S+)+)\s*$/;// styles RegExp
-
 	//attribute name mapping
 	var am = {
 		"tabindex" : "tabIndex",
@@ -79,31 +77,6 @@
 				} else {
 					el.style = a[an];
 				}
-//				var s = a[an];// styles
-//				s = s.split(";");
-//				for (var i=0; i<s.length; i++) {
-//					if (!s[i]) {
-//						continue;
-//					}
-//					if (s[i].match(re)) {
-//						var n = RegExp.$1; // style property
-//						var v = RegExp.$2; // style value
-//						if (n && v) {
-//							if (n.toLowerCase() === "float") {
-//								n = ("undefined" == typeof el.style.styleFloat) ? "cssFloat" : "styleFloat";
-//							} else {
-//								// convert property name to camelCase
-//								n = n.split('-');
-//								n[0] = n[0].toLowerCase();
-//								for (var j=1; j<n.length; j++) {
-//									n[j] = n[j].charAt(0).toUpperCase()+n[j].substr(1).toLowerCase();
-//								}
-//								n = n.join("");
-//							}
-//							el.style[n] = v;
-//						}
-//					}
-//				}
 			} else if (an.toLowerCase() === "class") {
 				el.className = a[an];
 			} else if (am[an.toLowerCase()]) {
