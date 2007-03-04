@@ -141,7 +141,7 @@
 			}
 		}
 
-		return (el && filter) ? filter(el) : el;
+		return (el && "function" === typeof filter) ? filter(el) : el;
 	}
 
 	return p(this);
