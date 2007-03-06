@@ -5,7 +5,7 @@
 		Created: 2006-11-15-0551
 		Modified: 2006-11-19-1705
 
-		Released under a BSD-style open-source license:
+		Released under an open-source license:
 		http://jsonml.org/License.htm
 
 		This transformation converts any XML document into JsonML.

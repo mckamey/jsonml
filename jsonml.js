@@ -4,7 +4,7 @@
 	Created: 2006-11-09-0116
 	Modified: 2007-02-15-2226
 
-	Released under a BSD-style open-source license:
+	Released under an open-source license:
 	http://jsonml.org/License.htm
 
     This file adds these methods to JavaScript:

@@ -3,7 +3,7 @@
 
 	Created: 2007-02-15-2235
 
-	Released under a BSD-style open-source license:
+	Released under an open-source license:
 	http://jsonml.org/License.htm
 */
 
