@@ -59,6 +59,8 @@
 
 	//attribute name mapping
 	var am = {
+		"rowspan" : "rowSpan",
+		"colspan" : "colSpan",
 		"tabindex" : "tabIndex",
 		"accesskey" : "accessKey",
 		"hidefocus" : "hideFocus"
