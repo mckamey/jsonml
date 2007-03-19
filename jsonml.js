@@ -2,7 +2,7 @@
 	JsonML.js
 
 	Created: 2006-11-09-0116
-	Modified: 2007-02-15-2226
+	Modified: 2007-03-08-2036
 
 	Released under an open-source license:
 	http://jsonml.org/License.htm
