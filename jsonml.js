@@ -61,9 +61,16 @@
 	var am = {
 		"rowspan" : "rowSpan",
 		"colspan" : "colSpan",
+		"cellpadding" : "cellPadding",
+		"cellspacing" : "cellSpacing",
 		"tabindex" : "tabIndex",
 		"accesskey" : "accessKey",
-		"hidefocus" : "hideFocus"
+		"hidefocus" : "hideFocus",
+		"usemap" : "useMap",
+		"maxlength" : "maxLength",
+		"readonly" : "readOnly",
+		"contenteditable" : "contentEditable"
+		// can add more attributes here as needed
 	};
 
 	//addAttributes
