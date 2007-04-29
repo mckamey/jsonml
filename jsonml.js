@@ -59,17 +59,17 @@
 
 	//attribute name mapping
 	var am = {
-		"rowspan" : "rowSpan",
-		"colspan" : "colSpan",
-		"cellpadding" : "cellPadding",
-		"cellspacing" : "cellSpacing",
-		"tabindex" : "tabIndex",
-		"accesskey" : "accessKey",
-		"hidefocus" : "hideFocus",
-		"usemap" : "useMap",
-		"maxlength" : "maxLength",
-		"readonly" : "readOnly",
-		"contenteditable" : "contentEditable"
+		rowspan : "rowSpan",
+		colspan : "colSpan",
+		cellpadding : "cellPadding",
+		cellspacing : "cellSpacing",
+		tabindex : "tabIndex",
+		accesskey : "accessKey",
+		hidefocus : "hideFocus",
+		usemap : "useMap",
+		maxlength : "maxLength",
+		readonly : "readOnly",
+		contenteditable : "contentEditable"
 		// can add more attributes here as needed
 	};
 
@@ -98,13 +98,14 @@
 
 	//appendChild
 	/*void*/ function ac(/*element*/ el, /*Array or String*/ c) {
+		var ct, tb;
 		if (c) {
 			if (el.tagName.toLowerCase() === "table" && el.tBodies) {
 				// in IE must explicitly nest TDs in TBODY
-				var ct = c.tagName ? c.tagName.toLowerCase() : null;// child tagName
+				ct = c.tagName ? c.tagName.toLowerCase() : null;// child tagName
 				if (ct && ct!=="tbody" && ct!=="thead") {
 					// insert in last tbody
-					var tb = el.tBodies.length>0 ? el.tBodies[el.tBodies.length-1] : null;// tBody
+					tb = el.tBodies.length>0 ? el.tBodies[el.tBodies.length-1] : null;// tBody
 					if (!tb) {
 						tb = document.createElement("tbody");
 						el.appendChild(tb);
@@ -157,8 +158,9 @@
 };
 
 /*element*/ String.prototype.parseJsonML = function (/*function(element)*/ filter) {
+	var jml;
 	try {
-		var jml = this.parseJSON();
+		jml = this.parseJSON();
 	} catch (ex) {
 		return null;
 	}
