@@ -1,6 +1,6 @@
 /*extern JSON, JsonML */
 /*
-	JsonML.js
+	JsonML2.js
 
 	Created: 2006-11-09-0116
 	Modified: 2007-03-08-2036
