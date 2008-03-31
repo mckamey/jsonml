@@ -55,7 +55,7 @@
 
 */
 
-if ("function" !== typeof Array.prototype.parseJsonML) {
+if (!Array.prototype.parseJsonML) {
 	/*element*/ Array.prototype.parseJsonML = function (/*element function(element)*/ filter) {
 
 		//attribute name mapping
@@ -158,7 +158,7 @@ if ("function" !== typeof Array.prototype.parseJsonML) {
 	};
 }
 
-if ("function" !== typeof String.prototype.parseJsonML) {
+if (!String.prototype.parseJsonML) {
 	/*element*/ String.prototype.parseJsonML = function (/*function(element)*/ filter) {
 		var jml;
 		try {
