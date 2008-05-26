@@ -3,7 +3,7 @@
 	JsonML2.js
 
 	Created: 2006-11-09-0116
-	Modified: 2007-03-08-2036
+	Modified: 2008-05-25-2326
 
 	Released under an open-source license:
 	http://jsonml.org/License.htm
@@ -78,21 +78,20 @@ JsonML.parse = function(/*JsonML*/ jml, /*element function(element)*/ filter) {
 	/*void*/ function aa(/*element*/ el, /*Object*/ a) {
 		// for each attributeName
 		for (var an in a) {
-			if (!an || typeof(a[an]) !== "string") {
-				continue;
-			}
-			if (an.toLowerCase() === "style") {
-				if ("undefined" !== typeof el.style.cssText) {
-					el.style.cssText = a[an];
+			if (an && "string" === typeof a[an]) {
+				if (an.toLowerCase() === "style") {
+					if ("undefined" !== typeof el.style.cssText) {
+						el.style.cssText = a[an];
+					} else {
+						el.style = a[an];
+					}
+				} else if (an.toLowerCase() === "class") {
+					el.className = a[an];
+				} else if (am[an.toLowerCase()]) {
+					el.setAttribute(am[an.toLowerCase()], a[an]);
 				} else {
-					el.style = a[an];
+					el.setAttribute(an, a[an]);
 				}
-			} else if (an.toLowerCase() === "class") {
-				el.className = a[an];
-			} else if (am[an.toLowerCase()]) {
-				el.setAttribute(am[an.toLowerCase()], a[an]);
-			} else {
-				el.setAttribute(an, a[an]);
 			}
 		}
 	}
@@ -128,7 +127,7 @@ JsonML.parse = function(/*JsonML*/ jml, /*element function(element)*/ filter) {
 			return document.createTextNode(jml);
 		}
 
-		if (!(jml instanceof Array) || jml.length < 1 || typeof(jml[0]) !== "string") {
+		if (!(jml instanceof Array) || jml.length < 1 || "string" !== typeof jml[0]) {
 			throw new Error("JsonML.parse");
 		}
 
@@ -138,10 +137,10 @@ JsonML.parse = function(/*JsonML*/ jml, /*element function(element)*/ filter) {
 
 		for (var i=1; i<jml.length; i++) {
 			if (!x) {
-				if (jml[i] instanceof Array || typeof(jml[i]) === "string") {
+				if (jml[i] instanceof Array || "string" === typeof jml[i]) {
 					// append children
 					ac(el, p(jml[i]));
-				} else if (typeof(jml[i]) === "object") {
+				} else if ("object" === typeof jml[i]) {
 					// add attributes
 					aa(el, jml[i]);
 				}

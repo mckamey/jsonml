@@ -2,7 +2,7 @@
 	JsonML.js
 
 	Created: 2006-11-09-0116
-	Modified: 2007-03-08-2036
+	Modified: 2008-05-25-2326
 
 	Released under an open-source license:
 	http://jsonml.org/License.htm
@@ -78,7 +78,7 @@ if (!Array.prototype.parseJsonML) {
 		/*void*/ function aa(/*element*/ el, /*Object*/ a) {
 			// for each attributeName
 			for (var an in a) {
-				if (an && typeof(a[an]) === "string") {
+				if (an && "string" === typeof a[an]) {
 					if (an.toLowerCase() === "style") {
 						if ("undefined" !== typeof el.style.cssText) {
 							el.style.cssText = a[an];
@@ -127,7 +127,7 @@ if (!Array.prototype.parseJsonML) {
 				return document.createTextNode(jml);
 			}
 
-			if (!(jml instanceof Array) || jml.length < 1 || typeof(jml[0]) !== "string") {
+			if (!(jml instanceof Array) || jml.length < 1 || "string" !== typeof jml[0]) {
 				throw new Error("parseJsonML");
 			}
 
@@ -137,10 +137,10 @@ if (!Array.prototype.parseJsonML) {
 
 			for (var i=1; i<jml.length; i++) {
 				if (!x) {
-					if (jml[i] instanceof Array || typeof(jml[i]) === "string") {
+					if (jml[i] instanceof Array || "string" === typeof jml[i]) {
 						// append children
 						ac(el, p(jml[i]));
-					} else if (typeof(jml[i]) === "object") {
+					} else if ("object" === typeof jml[i]) {
 						// add attributes
 						aa(el, jml[i]);
 					}
