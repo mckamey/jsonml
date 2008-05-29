@@ -1,4 +1,4 @@
-/*extern JSON, JsonML */
+/*global JSON, JsonML */
 /*
 	JsonML2.js
 
