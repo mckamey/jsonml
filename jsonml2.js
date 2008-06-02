@@ -3,7 +3,7 @@
 	JsonML2.js
 
 	Created: 2006-11-09-0116
-	Modified: 2008-05-25-2326
+	Modified: 2008-06-02-1339
 
 	Released under an open-source license:
 	http://jsonml.org/License.htm
@@ -133,14 +133,24 @@ JsonML.parse = function(/*JsonML*/ jml, /*element function(element)*/ filter) {
 
 		var t = jml[0]; // tagName
 		var x = (t.toLowerCase() === "script"); // check for scripts
-		var el = x ? null : document.createElement(t);
+		var css = (t.toLowerCase() === "style" && document.createStyleSheet);
+		var el = x||css ? null : document.createElement(t);
+		if (css) {
+			// IE requires this interface for styles
+			el = document.createStyleSheet();
+		}
 
 		for (var i=1; i<jml.length; i++) {
 			if (!x) {
 				if (jml[i] instanceof Array || "string" === typeof jml[i]) {
-					// append children
-					ac(el, p(jml[i]));
-				} else if ("object" === typeof jml[i]) {
+					if (css) {
+						// IE requires this interface for styles
+						el.cssText = jml[i];
+					} else {
+						// append children
+						ac(el, p(jml[i]));
+					}
+				} else if ("object" === typeof jml[i] && !css) {
 					// add attributes
 					aa(el, jml[i]);
 				}
@@ -149,6 +159,11 @@ JsonML.parse = function(/*JsonML*/ jml, /*element function(element)*/ filter) {
 					uncomment at your own risk, executes script elements */
 				//eval( "(" + jml[i] + ")" );
 			}
+		}
+
+		if (css) {
+			// in IE styles are effective immediately
+			return null;
 		}
 
 		return (el && "function" === typeof filter) ? filter(el) : el;
