@@ -3,7 +3,7 @@
 		JsonML.xsl
 
 		Created: 2006-11-15-0551
-		Modified: 2006-11-19-1705
+		Modified: 2008-06-30-0846
 
 		Released under an open-source license:
 		http://jsonml.org/License.htm
@@ -74,9 +74,6 @@
 
 	<!-- elements -->
 	<xsl:template match="*">
-		<xsl:if test="not(.=/*[position()=1])">
-			<xsl:value-of select="$VALUE_DELIM" />
-		</xsl:if>
 		<xsl:value-of select="$START_ELEM" />
 
 		<!-- tag-name string -->
@@ -106,6 +103,7 @@
 
 		<!-- child elements and text-nodes -->
 		<xsl:for-each select="*|text()|comment()">
+			<xsl:value-of select="$VALUE_DELIM" />
 			<xsl:apply-templates select="." />
 		</xsl:for-each>
 
