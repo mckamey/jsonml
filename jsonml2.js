@@ -3,7 +3,7 @@
 	JsonML2.js
 
 	Created: 2006-11-09-0116
-	Modified: 2008-07-28-2320
+	Modified: 2008-07-28-2337
 
 	Released under an open-source license:
 	http://jsonml.org/License.htm
@@ -81,7 +81,7 @@ JsonML.parse = function(/*JsonML*/ jml, /*element function(element)*/ filter) {
 			// attributeValue
 			var av = a[an];
 			if (an && "string" === typeof av) {
-				an = an.toLowerCase();
+				an = am[an.toLowerCase()] || an;
 				if (an === "style") {
 					if ("undefined" !== typeof el.style.cssText) {
 						el.style.cssText = av;
@@ -91,7 +91,7 @@ JsonML.parse = function(/*JsonML*/ jml, /*element function(element)*/ filter) {
 				} else if (an === "class") {
 					el.className = av;
 				} else {
-					el.setAttribute(am[an]||an, av);
+					el.setAttribute(an, av);
 				}
 			}
 		}
