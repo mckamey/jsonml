@@ -93,6 +93,12 @@ JsonML.parse = function(/*JsonML*/ jml, /*element function(element)*/ filter) {
 						el.className = av;
 					} else {
 						el.setAttribute(an, av);
+
+						// in IE cannot set onclick events directly
+						if (an.indexOf('on') === 0 && "function" !== typeof el[an]) {
+							/*jslint evil:true */
+							el[an] = new Function(av);
+						}
 					}
 				}
 			}
