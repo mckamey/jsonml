@@ -3,7 +3,7 @@
 	JsonML2.js
 
 	Created: 2006-11-09-0116
-	Modified: 2008-07-28-2337
+	Modified: 2008-08-02-1158
 
 	Released under an open-source license:
 	http://jsonml.org/License.htm
@@ -104,16 +104,21 @@ JsonML.parse = function(/*JsonML*/ jml, /*element function(element)*/ filter) {
 		var ct, tb;
 		if (c) {
 			if (el.tagName.toLowerCase() === "table" && el.tBodies) {
-				// in IE must explicitly nest TDs in TBODY
-				ct = c.tagName ? c.tagName.toLowerCase() : null;// child tagName
-				if (ct && ct!=="tbody" && ct!=="thead") {
+				if (!c.tagName) {
+					return;
+				}
+				// in IE must explicitly nest TRs in TBODY
+				ct = c.tagName.toLowerCase();// child tagName
+				if (ct && ct !== "tbody" && ct !== "thead") {
 					// insert in last tbody
-					tb = el.tBodies.length>0 ? el.tBodies[el.tBodies.length-1] : null;// tBody
+					tb = el.tBodies.length > 0 ? el.tBodies[el.tBodies.length-1] : null;// tBody
 					if (!tb) {
-						tb = document.createElement("tbody");
+						tb = document.createElement(ct==="th" ? "tHead" : "tBody");
 						el.appendChild(tb);
 					}
 					tb.appendChild(c);
+				} else {
+					el.appendChild(c);
 				}
 			} else {
 				el.appendChild(c);
