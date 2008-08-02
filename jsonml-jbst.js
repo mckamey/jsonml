@@ -3,7 +3,7 @@
 	JsonML Browser Side Templates
 	Copyright (c)2006-2008 Stephen M. McKamey
 	Created: 2008-07-28-2337
-	Modified: 2008-07-29-0856
+	Modified: 2008-08-01-2338
 \*---------------------------------------------------------*/
 
 /* namespace JBST */
@@ -11,7 +11,7 @@ if ("undefined" === typeof JBST) {
 	window.JBST = {};
 }
 
-/*JsonML*/ JBST.dataBind = function(/*JsonML*/ template, /*object*/ data, /*int*/ index) {
+/*JsonML*/ JBST.dataBind = function(/*JBST*/ template, /*object*/ data, /*int*/ index) {
 	// NOTE: it is very important to add transformations to a copy of the template
 	// nodes, otherwise it destroys the original template.
 
@@ -32,7 +32,7 @@ if ("undefined" === typeof JBST) {
 				output = [];
 				for (var i=0; i<node.length; i++) {
 					var result = dataBind(node[i], data, index);
-					if (result instanceof Array && result.IEnumerable) {
+					if (result instanceof Array && result.$JBST) {
 						output = output.concat(result);
 					} else if ("object" === typeof result) {
 						output.push(result);
@@ -65,7 +65,7 @@ if ("undefined" === typeof JBST) {
 	var output = [];
 
 	// TODO: need some sort of flag here, instanceof?
-	output.IEnumerable = true;
+	output.$JBST = true;
 
 	if (data instanceof Array) {
 		for (var i=0; i<data.length; i++) {

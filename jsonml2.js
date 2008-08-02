@@ -78,20 +78,22 @@ JsonML.parse = function(/*JsonML*/ jml, /*element function(element)*/ filter) {
 	/*void*/ function aa(/*element*/ el, /*Object*/ a) {
 		// for each attributeName
 		for (var an in a) {
-			// attributeValue
-			var av = a[an];
-			if (an && "string" === typeof av) {
-				an = am[an.toLowerCase()] || an;
-				if (an === "style") {
-					if ("undefined" !== typeof el.style.cssText) {
-						el.style.cssText = av;
+			if (a.hasOwnProperty(an)) {
+				// attributeValue
+				var av = a[an];
+				if (an && "string" === typeof av) {
+					an = am[an.toLowerCase()] || an;
+					if (an === "style") {
+						if ("undefined" !== typeof el.style.cssText) {
+							el.style.cssText = av;
+						} else {
+							el.style = av;
+						}
+					} else if (an === "class") {
+						el.className = av;
 					} else {
-						el.style = av;
+						el.setAttribute(an, av);
 					}
-				} else if (an === "class") {
-					el.className = av;
-				} else {
-					el.setAttribute(an, av);
 				}
 			}
 		}
