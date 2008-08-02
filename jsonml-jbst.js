@@ -1,20 +1,17 @@
-﻿/*global JsonFx */
+﻿/*global JBST */
 /*---------------------------------------------------------*\
-	JsonFx BST
+	JsonML Browser Side Templates
 	Copyright (c)2006-2008 Stephen M. McKamey
 	Created: 2008-07-28-2337
 	Modified: 2008-07-29-0856
 \*---------------------------------------------------------*/
 
-/* namespace JsonFx */
-if ("undefined" === typeof JsonFx) {
-	window.JsonFx = {};
+/* namespace JBST */
+if ("undefined" === typeof JBST) {
+	window.JBST = {};
 }
 
-/* namespace JsonFx.JBST */
-JsonFx.JBST = {};
-
-/*JsonML*/ JsonFx.JBST.dataBind = function(/*JsonML*/ template, /*object*/ data, /*int*/ index) {
+/*JsonML*/ JBST.dataBind = function(/*JsonML*/ template, /*object*/ data, /*int*/ index) {
 	// NOTE: it is very important to add transformations to a copy of the template
 	// nodes, otherwise it destroys the original template.
 
@@ -64,7 +61,7 @@ JsonFx.JBST = {};
 	return dataBind(template, data, index);
 };
 
-/*JsonML*/ JsonFx.JBST.forEach = function(/*JsonML*/ template, /*array*/ data) {
+/*JsonML*/ JBST.forEach = function(/*JsonML*/ template, /*array*/ data) {
 	var output = [];
 
 	// TODO: need some sort of flag here, instanceof?
@@ -73,7 +70,7 @@ JsonFx.JBST = {};
 	if (data instanceof Array) {
 		for (var i=0; i<data.length; i++) {
 
-			output[i] = JsonFx.JBST.dataBind(template, data[i], i);
+			output[i] = JBST.dataBind(template, data[i], i);
 		}
 	}
 
