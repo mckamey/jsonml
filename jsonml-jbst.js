@@ -1,4 +1,4 @@
-﻿/*global JBST */
+﻿/*global JsonML */
 /*---------------------------------------------------------*\
 	JsonML Browser Side Templates
 	Copyright (c)2006-2008 Stephen M. McKamey
@@ -6,13 +6,13 @@
 	Modified: 2008-08-02-1501
 \*---------------------------------------------------------*/
 
-/* namespace JBST */
-if ("undefined" === typeof JBST) {
-	window.JBST = {};
+/* namespace JsonML */
+if ("undefined" === typeof JsonML) {
+	window.JsonML = {};
 }
 
 // combines JBST and JSON to produce JsonML
-/*JsonML*/ JBST.dataBind = function(/*JBST*/ template, /*JSON*/ data, /*int*/ index) {
+/*JsonML*/ JsonML.dataBind = function(/*JBST*/ jbst, /*JSON*/ data) {
 	// NOTE: it is very important to add transformations to a copy of the template
 	// nodes, otherwise it destroys the original template.
 
@@ -75,11 +75,11 @@ if ("undefined" === typeof JBST) {
 
 		for (var i=0; i<data.length; i++) {
 			// apply template to each item in array
-			o[i] = db(template, data[i], i);
+			o[i] = db(jbst, data[i], i);
 		}
 		return o;
 	} else {
 		// data is singular to apply template once
-		return db(template, data, index);
+		return db(jbst, data, -1);
 	}
 };
