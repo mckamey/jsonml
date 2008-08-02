@@ -61,7 +61,7 @@ if ("undefined" === typeof JBST) {
 	return dataBind(template, data, index);
 };
 
-/*JsonML*/ JBST.forEach = function(/*JsonML*/ template, /*array*/ data) {
+/*JsonML*/ JBST.dataBindEach = function(/*JsonML*/ template, /*array*/ data) {
 	var output = [];
 
 	// TODO: need some sort of flag here, instanceof?
