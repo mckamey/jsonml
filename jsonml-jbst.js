@@ -21,10 +21,11 @@ if ("undefined" === typeof JsonML) {
 
 // combines JsonML+BST and JSON to produce JsonML
 /*JsonML*/ JsonML.dataBind = function(/*JsonML+BST*/ jbst, /*JSON*/ data) {
-	// NOTE: it is very important to add transformations to a copy of the template
-	// nodes, otherwise it destroys the original template.
 
-	// recursively applies dataBind to all nodes of the template graph
+	// recursively apply dataBind to all nodes of the template graph
+	// NOTE: it is very important to replace each node with a copy,
+	// otherwise it destroys the original template.
+
 	/*object*/ function db(/*JsonML+BST*/ t, /*JSON*/ d, /*int*/ n) {
 		// for each JsonML+BST node
 		if (t) {
@@ -44,7 +45,7 @@ if ("undefined" === typeof JsonML) {
 				for (var i=0; i<t.length; i++) {
 					// result
 					var r = db(t[i], d, n);
-					if (r instanceof Array && r.$isBST) {
+					if (r instanceof Array && r.$isFrag) {
 						// result was multiple JsonML trees
 						o = o.concat(r);
 					} else if ("object" === typeof r) {
@@ -79,7 +80,7 @@ if ("undefined" === typeof JsonML) {
 		var o = [];
 
 		// flag container to differentiate from JsonML
-		o.$isBST = true;
+		o.$isFrag = true;
 
 		for (var i=0; i<data.length; i++) {
 			// apply template to each item in array

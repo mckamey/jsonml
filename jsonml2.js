@@ -119,7 +119,7 @@ JsonML.parse = function(/*JsonML*/ jml, /*element function(element)*/ filter) {
 					// insert in last tbody
 					tb = el.tBodies.length > 0 ? el.tBodies[el.tBodies.length-1] : null;// tBody
 					if (!tb) {
-						tb = document.createElement(ct==="th" ? "tHead" : "tBody");
+						tb = document.createElement(ct==="th" ? "thead" : "tbody");
 						el.appendChild(tb);
 					}
 					tb.appendChild(c);
@@ -141,8 +141,20 @@ JsonML.parse = function(/*JsonML*/ jml, /*element function(element)*/ filter) {
 			return document.createTextNode(jml);
 		}
 
+		var i;
+
 		if (!(jml instanceof Array) || jml.length < 1 || "string" !== typeof jml[0]) {
-			throw new Error("JsonML.parse");
+			// correctly handle a list of JsonML tree
+			if ((jml instanceof Array) && jml.$isFrag) {
+				// create a document fragment to hold elements
+				var f = document.createDocumentFragment();
+				for (i=0; i<jml.length; i++) {
+					f.appendChild(p(jml[i]));
+				}
+				return f;
+			}
+
+			throw new Error("JsonML.parse: invalid JsonML tree");
 		}
 
 		var t = jml[0]; // tagName
@@ -154,7 +166,7 @@ JsonML.parse = function(/*JsonML*/ jml, /*element function(element)*/ filter) {
 			el = document.createStyleSheet();
 		}
 
-		for (var i=1; i<jml.length; i++) {
+		for (i=1; i<jml.length; i++) {
 			if (!x) {
 				if (jml[i] instanceof Array || "string" === typeof jml[i]) {
 					if (css) {
