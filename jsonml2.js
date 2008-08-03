@@ -3,7 +3,7 @@
 	JsonML2.js
 
 	Created: 2006-11-09-0116
-	Modified: 2008-08-02-1158
+	Modified: 2008-08-03-1127
 
 	Released under an open-source license:
 	http://jsonml.org/License.htm
@@ -141,29 +141,30 @@ JsonML.parse = function(/*JsonML*/ jml, /*element function(element)*/ filter) {
 			return document.createTextNode(jml);
 		}
 
-		var i;
-
-		if (!(jml instanceof Array) || jml.length < 1 || "string" !== typeof jml[0]) {
-			// correctly handle a list of JsonML tree
-			if ((jml instanceof Array) && jml.$isFrag) {
-				// create a document fragment to hold elements
-				var f = document.createDocumentFragment();
-				for (i=0; i<jml.length; i++) {
-					f.appendChild(p(jml[i]));
-				}
-				return f;
-			}
-
+		if (!(jml instanceof Array) || !jml.length || "string" !== typeof jml[0]) {
 			throw new Error("JsonML.parse: invalid JsonML tree");
 		}
 
+		var i;
 		var t = jml[0]; // tagName
+		if (!t) {
+			// correctly handle a list of JsonML trees
+			// create a document fragment to hold elements
+			var f = document.createDocumentFragment();
+			for (i=1; i<jml.length; i++) {
+				f.appendChild(p(jml[i]));
+			}
+			return f;
+		}
+
 		var x = (t.toLowerCase() === "script"); // check for scripts
 		var css = (t.toLowerCase() === "style" && document.createStyleSheet);
-		var el = x||css ? null : document.createElement(t);
+		var el;
 		if (css) {
 			// IE requires this interface for styles
 			el = document.createStyleSheet();
+		} else {
+			el = x ? null : document.createElement(t);
 		}
 
 		for (i=1; i<jml.length; i++) {
@@ -182,7 +183,7 @@ JsonML.parse = function(/*JsonML*/ jml, /*element function(element)*/ filter) {
 				}
 			//} else if (typeof(jml[i]) === "string") {
 				/*	JSLint: "eval is evil"
-					uncomment at your own risk, executes script elements */
+					uncomment at your own risk, executes script elements immediately */
 				//eval( "(" + jml[i] + ")" );
 			}
 		}

@@ -45,8 +45,9 @@ if ("undefined" === typeof JsonML) {
 				for (var i=0; i<t.length; i++) {
 					// result
 					var r = db(t[i], d, n);
-					if (r instanceof Array && r.$isFrag) {
+					if (r instanceof Array && r.length && r[0] === "") {
 						// result was multiple JsonML trees
+						r.shift();
 						o = o.concat(r);
 					} else if ("object" === typeof r) {
 						// result was a JsonML tree
@@ -77,14 +78,12 @@ if ("undefined" === typeof JsonML) {
 	}
 
 	if (data instanceof Array) {
-		var o = [];
-
-		// flag container to differentiate from JsonML
-		o.$isFrag = true;
+		// create a document fragment to hold list
+		var o = [""];
 
 		for (var i=0; i<data.length; i++) {
 			// apply template to each item in array
-			o[i] = db(jbst, data[i], i);
+			o.push(db(jbst, data[i], i));
 		}
 		return o;
 	} else {
