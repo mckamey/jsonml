@@ -11,8 +11,8 @@ if ("undefined" === typeof JsonML) {
 	window.JsonML = {};
 }
 
-// combines JBST and JSON to produce JsonML
-/*JsonML*/ JsonML.dataBind = function(/*JBST*/ jbst, /*JSON*/ data) {
+// combines JsonML+BST and JSON to produce JsonML
+/*JsonML*/ JsonML.dataBind = function(/*JsonML+BST*/ jbst, /*JSON*/ data) {
 	// NOTE: it is very important to add transformations to a copy of the template
 	// nodes, otherwise it destroys the original template.
 
