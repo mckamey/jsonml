@@ -17,8 +17,8 @@ if ("undefined" === typeof JsonML) {
 	// nodes, otherwise it destroys the original template.
 
 	// recursively applies dataBind to all nodes of the template graph
-	/*object*/ function db(/*JBST*/ t, /*JSON*/ d, /*int*/ n) {
-		// JBST node
+	/*object*/ function db(/*JsonML+BST*/ t, /*JSON*/ d, /*int*/ n) {
+		// for each JsonML+BST node
 		if (t) {
 			if ("function" === typeof t) {
 				// this corresponds to the $item parameter
