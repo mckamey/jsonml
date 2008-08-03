@@ -1,10 +1,18 @@
 ﻿/*global JsonML */
-/*---------------------------------------------------------*\
-	JsonML Browser Side Templates
-	Copyright (c)2006-2008 Stephen M. McKamey
+/*
+	JsonML_BST.js
+	JsonML Browser Side Templating
+
 	Created: 2008-07-28-2337
 	Modified: 2008-08-02-1501
-\*---------------------------------------------------------*/
+
+	Released under an open-source license:
+	http://jsonml.org/License.htm
+
+    This file creates a global JsonML object containing this method:
+
+        JsonML.dataBind(template, data)
+*/
 
 /* namespace JsonML */
 if ("undefined" === typeof JsonML) {

@@ -8,7 +8,7 @@
 	Released under an open-source license:
 	http://jsonml.org/License.htm
 
-    This file adds these methods to JavaScript:
+    This file creates a global JsonML object containing this method:
 
         JsonML.parse(string|array, filter)
 
