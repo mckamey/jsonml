@@ -1,7 +1,7 @@
 ﻿/*global JsonML */
 /*
 	JsonML_BST.js
-	JsonML Browser Side Templating
+	JsonML Browser-Side Templating
 
 	Created: 2008-07-28-2337
 	Modified: 2008-08-02-1501
