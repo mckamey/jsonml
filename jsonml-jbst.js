@@ -36,7 +36,7 @@ if ("undefined" === typeof JsonML) {
 				for (var i=0; i<t.length; i++) {
 					// result
 					var r = db(t[i], d, n);
-					if (r instanceof Array && r.$JBST) {
+					if (r instanceof Array && r.$isBST) {
 						// result was multiple JsonML trees
 						o = o.concat(r);
 					} else if ("object" === typeof r) {
@@ -71,7 +71,7 @@ if ("undefined" === typeof JsonML) {
 		var o = [];
 
 		// flag container to differentiate from JsonML
-		o.$JBST = true;
+		o.$isBST = true;
 
 		for (var i=0; i<data.length; i++) {
 			// apply template to each item in array
