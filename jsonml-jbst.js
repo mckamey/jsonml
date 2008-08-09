@@ -4,7 +4,7 @@
 	JsonML Browser-Side Templating
 
 	Created: 2008-07-28-2337
-	Modified: 2008-08-02-1501
+	Modified: 2008-08-09-0930
 
 	Released under an open-source license:
 	http://jsonml.org/License.htm
@@ -27,6 +27,11 @@ if ("undefined" === typeof JsonML) {
 	// otherwise it destroys the original template.
 
 	/*object*/ function db(/*JsonML+BST*/ t, /*JSON*/ d, /*int*/ n) {
+		// don't bind to empty data
+		if ("undefined" === typeof d || d === null) {
+			return null;
+		}
+
 		// for each JsonML+BST node
 		if (t) {
 			if ("function" === typeof t) {
