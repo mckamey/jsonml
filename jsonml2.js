@@ -3,7 +3,7 @@
 	JsonML2.js
 
 	Created: 2006-11-09-0116
-	Modified: 2008-08-03-1127
+	Modified: 2008-08-26-0856
 
 	Released under an open-source license:
 	http://jsonml.org/License.htm
@@ -123,10 +123,10 @@ JsonML.parse = function(/*JsonML*/ jml, /*element function(element)*/ filter) {
 						el.appendChild(tb);
 					}
 					tb.appendChild(c);
-				} else {
+				} else if (el.canHaveChildren !== false) {
 					el.appendChild(c);
 				}
-			} else {
+			} else if (el.canHaveChildren !== false) {
 				el.appendChild(c);
 			}
 		}
