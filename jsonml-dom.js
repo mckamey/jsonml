@@ -10,7 +10,7 @@
 if ("undefined" === typeof window.JsonML) {
 	window.JsonML = {};
 }
-/*JsonML*/ JsonML.convertElement = function(/*element*/ elem) {
+/*JsonML*/ JsonML.parseDOM = function(/*element*/ elem) {
 	if (!elem) {
 		return null;
 	}
@@ -38,7 +38,7 @@ if ("undefined" === typeof window.JsonML) {
 			if (elem.hasChildNodes()) {
 				for (i=0; i<elem.childNodes.length; i++) {
 					var c = elem.childNodes[i];
-					c = JsonML.convertElement(c);
+					c = JsonML.parseDOM(c);
 					if (c) {
 						jml.push(c);
 					}
