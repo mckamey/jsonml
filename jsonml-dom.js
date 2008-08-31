@@ -1,5 +1,5 @@
 ﻿/*
-	Dom2JsonML.js
+	JsonML_DOM.js
 
 	Created: 2007-02-15-2235
 
@@ -10,7 +10,7 @@
 if ("undefined" === typeof window.JsonML) {
 	window.JsonML = {};
 }
-/*JsonML*/ JsonML.parseDOM = function(/*element*/ elem) {
+/*JsonML*/ JsonML.parseDOM = function(/*DOM*/ elem) {
 	if (!elem) {
 		return null;
 	}
