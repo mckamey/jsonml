@@ -28,7 +28,7 @@ if ("undefined" === typeof window.JsonML) {
 			for (i=0; i<a.length; i++) {
 				if (a[i].specified) {
 					if (a[i].name === "style") {
-						att["style"] = elem.style.cssText ? elem.style.cssText : a[i].value;
+						att.style = elem.style.cssText ? elem.style.cssText : a[i].value;
 					} else if ("string" === typeof a[i].value) {
 						att[a[i].name] = a[i].value;
 					}
