@@ -2,6 +2,7 @@
 	JsonML_DOM.js
 
 	Created: 2007-02-15-2235
+	Modified: 2008-08-31-1813
 
 	Released under an open-source license:
 	http://jsonml.org/License.htm
@@ -18,7 +19,8 @@ if ("undefined" === typeof window.JsonML) {
 	var i;
 	switch (elem.nodeType) {
 		case 1: // element
-			var jml = [elem.tagName];
+		case 11: // documentFragment
+			var jml = [elem.tagName||""];
 			var a = elem.attributes;
 			var att = {};
 			var hasAttrib = false;
@@ -50,4 +52,17 @@ if ("undefined" === typeof window.JsonML) {
 		default: // comments, etc.
 			return null;
 	}
+};
+
+/*JsonML*/ JsonML.parseHTML = function(/*string*/ html) {
+	var elem = document.createElement("div");
+	elem.innerHTML = html;
+	var jml = JsonML.parseDOM(elem);
+	if (jml.length === 2) {
+		return jml[1];
+	}
+
+	// make wrapper a document fragment
+	jml[0] = "";
+	return jml;
 };
