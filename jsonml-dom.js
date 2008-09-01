@@ -3,7 +3,7 @@
 	JsonML_DOM.js
 
 	Created: 2007-02-15-2235
-	Modified: 2008-08-31-1839
+	Modified: 2008-08-31-2206
 
 	Released under an open-source license:
 	http://jsonml.org/License.htm
@@ -68,16 +68,20 @@ if ("undefined" === typeof window.JsonML) {
 	return jml;
 };
 
-/*ctor*/
+/*legacy adapter*/
 JsonML.Response = function() {
 	// response buffer
 	/*string*/ var r = "";
 
-	// accomodate all walks of life
-	/*void*/ this.Write = this.write = this.print = this.printLn = 
-		function(/*string*/ value) {
-			r += value;
-		};
+	// accomodate various legacy interfaces
+	/*void*/ this.Write = this.write = this.print = this.println = 
+			function(/*string*/ value) {
+				r += String(value);
+			};
+
+	/*void*/ this.Clear = this.clear = function() {
+		r = "";
+	};
 
 	/*JsonML*/ this.render = function() {
 		return JsonML.parseHTML(r);
