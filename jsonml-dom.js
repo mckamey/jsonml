@@ -1,4 +1,5 @@
-﻿/*
+﻿/*global JsonML */
+/*
 	JsonML_DOM.js
 
 	Created: 2007-02-15-2235
