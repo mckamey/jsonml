@@ -34,7 +34,7 @@ JsonML.BST = function(/*JsonML+BST*/ jbst) {
 			if ("function" === typeof t) {
 				// temporary method name using a counter to
 				// avoid collisions when recursively calling
-				var m = "$jbst_"+(g++)+"";
+				var m = "$jbst."+(g++);
 				try {
 					// setup context for code block
 					self[m] = t;
