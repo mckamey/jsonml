@@ -2,7 +2,7 @@
 	JsonML.js
 
 	Created: 2006-11-09-0116
-	Modified: 2008-09-07-1006
+	Modified: 2008-09-07-1233
 
 	Released under an open-source license:
 	http://jsonml.org/License.htm
@@ -101,7 +101,7 @@ if (!Array.prototype.parseJsonML) {
 		/*void*/ function ac(/*element*/ el, /*Array or String*/ c) {
 			var ct, tb;
 			if (c) {
-				if (el.tagName.toLowerCase() === "table" && el.tBodies) {
+				if (el.tagName && el.tagName.toLowerCase() === "table" && el.tBodies) {
 					// in IE must explicitly nest TDs in TBODY
 					ct = c.tagName ? c.tagName.toLowerCase() : null;// child tagName
 					if (ct && ct!=="tbody" && ct!=="thead") {
@@ -141,7 +141,7 @@ if (!Array.prototype.parseJsonML) {
 					document.createDocumentFragment() :
 					document.createElement("");
 				for (i=1; i<jml.length; i++) {
-					f.appendChild(p(jml[i]));
+					ac(f, p(jml[i]));
 				}
 				return f;
 			}
