@@ -2,7 +2,7 @@
 	JsonML.js
 
 	Created: 2006-11-09-0116
-	Modified: 2008-08-03-1127
+	Modified: 2008-09-07-1006
 
 	Released under an open-source license:
 	http://jsonml.org/License.htm
@@ -137,7 +137,9 @@ if (!Array.prototype.parseJsonML) {
 			if (!t) {
 				// correctly handle a list of JsonML trees
 				// create a document fragment to hold elements
-				var f = document.createDocumentFragment();
+				var f = document.createDocumentFragment ?
+					document.createDocumentFragment() :
+					document.createElement("");
 				for (i=1; i<jml.length; i++) {
 					f.appendChild(p(jml[i]));
 				}
