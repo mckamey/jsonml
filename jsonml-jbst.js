@@ -4,7 +4,7 @@
 	JsonML Browser-Side Templating
 
 	Created: 2008-07-28-2337
-	Modified: 2008-08-29-0056
+	Modified: 2008-09-13-1051
 
 	Released under an open-source license:
 	http://jsonml.org/License.htm
@@ -28,7 +28,11 @@ JsonML.BST = function(/*JsonML+BST*/ jbst) {
 	// recursively applies dataBind to all nodes of the template graph
 	// NOTE: it is very important to replace each node with a copy,
 	// otherwise it destroys the original template.
-	/*object*/ function db(/*JsonML+BST*/ t, /*object*/ d, /*int*/ n) {
+	// t: current template node being data bound
+	// d: current data item being bound
+	// n: index of current data item
+	// j: nested JsonML+BST template
+	/*object*/ function db(/*JsonML+BST*/ t, /*object*/ d, /*int*/ n, /*JsonML+BST*/ j) {
 		// process JsonML+BST node
 		if (t) {
 			if ("function" === typeof t) {
@@ -39,6 +43,7 @@ JsonML.BST = function(/*JsonML+BST*/ jbst) {
 					// setup context for code block
 					self[m] = t;
 					self.data = d;
+					self.jbst = j;
 					self.index = isFinite(n) ? Number(n) : -1;
 					// execute in the context of template as "this"
 					return self[m]();
@@ -46,6 +51,7 @@ JsonML.BST = function(/*JsonML+BST*/ jbst) {
 					g--;
 					delete self[m];
 					delete self.data;
+					delete self.jbst;
 					delete self.index;
 				}
 			}
@@ -56,7 +62,7 @@ JsonML.BST = function(/*JsonML+BST*/ jbst) {
 				o = [];
 				for (var i=0; i<t.length; i++) {
 					// result
-					var r = db(t[i], d, n);
+					var r = db(t[i], d, n, j);
 					if (r instanceof Array && r.length && r[0] === "") {
 						// result was multiple JsonML trees
 						r.shift();
@@ -78,7 +84,7 @@ JsonML.BST = function(/*JsonML+BST*/ jbst) {
 				// for each property in node
 				for (var p in t) {
 					if (t.hasOwnProperty(p)) {
-						o[p] = db(t[p], d, n);
+						o[p] = db(t[p], d, n, j);
 					}
 				}
 				return o;
@@ -91,19 +97,19 @@ JsonML.BST = function(/*JsonML+BST*/ jbst) {
 
 	// the publicly exposed instance method
 	// combines JsonML+BST and JSON to produce JsonML
-	/*JsonML*/ this.dataBind = function(/*object*/ data, /*int*/ index) {
+	/*JsonML*/ this.dataBind = function(/*object*/ data, /*int*/ index, /*JsonML+BST*/ inner) {
 		if (data instanceof Array) {
 			// create a document fragment to hold list
 			var o = [""];
 
 			for (var i=0; i<data.length; i++) {
 				// apply template to each item in array
-				o.push(db(jbst, data[i], i));
+				o.push(db(jbst, data[i], i, inner));
 			}
 			return o;
 		} else {
 			// data is singular to apply template once
-			return db(jbst, data, index);
+			return db(jbst, data, index, inner);
 		}
 	};
 };
