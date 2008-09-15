@@ -4,7 +4,7 @@
 	JsonML Browser-Side Templating
 
 	Created: 2008-07-28-2337
-	Modified: 2008-09-13-1051
+	Modified: 2008-09-14-2130
 
 	Released under an open-source license:
 	http://jsonml.org/License.htm
@@ -44,7 +44,7 @@ JsonML.BST = function(/*JsonML+BST*/ jbst) {
 					self[m] = t;
 					self.data = d;
 					self.jbst = j;
-					self.index = isFinite(n) ? Number(n) : -1;
+					self.index = isFinite(n) ? Number(n) : NaN;
 					// execute in the context of template as "this"
 					return self[m]();
 				} finally {
