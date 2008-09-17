@@ -52,7 +52,7 @@
 
 */
 
-if ("undefined" === typeof JsonML) {
+if ("undefined" === typeof window.JsonML) {
 	window.JsonML = {};
 }
 
