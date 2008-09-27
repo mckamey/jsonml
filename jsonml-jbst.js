@@ -96,7 +96,7 @@ JsonML.BST = function(/*JsonML+BST*/ jbst) {
 	}
 
 	// the publicly exposed instance method
-	// combines JsonML+BST and JSON to produce JsonML
+	// combines JBST and JSON to produce JsonML
 	/*JsonML*/ this.dataBind = function(/*object*/ data, /*int*/ index, /*JsonML+BST*/ inner) {
 		if (data instanceof Array) {
 			// create a document fragment to hold list
