@@ -1,13 +1,13 @@
 ﻿/*global JsonML */
 /*
 	JsonML_BST.js
-	JsonML Browser-Side Templating
+	JsonML + Browser-Side Templating (JBST) support
 
 	Created: 2008-07-28-2337
 	Modified: 2008-09-14-2130
 
-	Released under an open-source license:
-	http://jsonml.org/License.htm
+	Copyright (c)2006-2008 Stephen M. McKamey
+	Released under an open-source license: http://jsonml.org/license
 
     This file creates a JsonML.BST type containing this method:
 

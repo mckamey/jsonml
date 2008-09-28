@@ -1,12 +1,13 @@
 ﻿/*global JsonML */
 /*
 	JsonML_DOM.js
+	DOM to JsonML utility
 
 	Created: 2007-02-15-2235
 	Modified: 2008-08-31-2206
 
-	Released under an open-source license:
-	http://jsonml.org/License.htm
+	Copyright (c)2006-2008 Stephen M. McKamey
+	Released under an open-source license: http://jsonml.org/license
 */
 
 if ("undefined" === typeof window.JsonML) {

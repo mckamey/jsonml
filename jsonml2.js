@@ -1,12 +1,13 @@
 /*global JSON, JsonML */
 /*
 	JsonML2.js
+	JsonML support
 
 	Created: 2006-11-09-0116
 	Modified: 2008-09-07-1233
 
-	Released under an open-source license:
-	http://jsonml.org/License.htm
+	Copyright (c)2006-2008 Stephen M. McKamey
+	Released under an open-source license: http://jsonml.org/license
 
     This file creates a global JsonML object containing this method:
 
