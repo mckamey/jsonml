@@ -7,7 +7,7 @@
 	Modified: 2008-08-31-2206
 
 	Copyright (c)2006-2008 Stephen M. McKamey
-	Released under an open-source license: http://jsonml.org/license
+	Distributed under an open-source license: http://jsonml.org/license
 */
 
 if ("undefined" === typeof window.JsonML) {
