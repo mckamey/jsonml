@@ -56,7 +56,7 @@
 */
 
 if (!Array.prototype.parseJsonML) {
-	/*element*/ Array.prototype.parseJsonML = function (/*element function(element)*/ filter) {
+	/*DOM*/ Array.prototype.parseJsonML = function (/*DOM function(DOM)*/ filter) {
 
 		//attribute name mapping
 		var am = {
@@ -75,7 +75,7 @@ if (!Array.prototype.parseJsonML) {
 		};
 
 		//addAttributes
-		/*void*/ function aa(/*element*/ el, /*Object*/ a) {
+		/*void*/ function aa(/*DOM*/ el, /*Object*/ a) {
 			// for each attributeName
 			for (var an in a) {
 				// attributeValue
@@ -98,7 +98,7 @@ if (!Array.prototype.parseJsonML) {
 		}
 
 		//appendChild
-		/*void*/ function ac(/*element*/ el, /*Array or String*/ c) {
+		/*void*/ function ac(/*DOM*/ el, /*Array or String*/ c) {
 			var ct, tb;
 			if (c) {
 				if (el.tagName && el.tagName.toLowerCase() === "table" && el.tBodies) {
@@ -120,7 +120,7 @@ if (!Array.prototype.parseJsonML) {
 		}
 
 		//parseJsonML
-		/*element*/ function p(/*JsonML*/ jml) {
+		/*DOM*/ function p(/*JsonML*/ jml) {
 			if (!jml) {
 				return null;
 			}
@@ -190,7 +190,7 @@ if (!Array.prototype.parseJsonML) {
 }
 
 if (!String.prototype.parseJsonML) {
-	/*element*/ String.prototype.parseJsonML = function (/*function(element)*/ filter) {
+	/*DOM*/ String.prototype.parseJsonML = function (/*function(element)*/ filter) {
 		var jml;
 		try {
 			jml = this.parseJSON();
