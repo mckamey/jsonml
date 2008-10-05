@@ -2,7 +2,7 @@
 	JsonML.js
 
 	Created: 2006-11-09-0116
-	Modified: 2008-09-07-1233
+	Modified: 2008-10-04-2024
 
 	Released under an open-source license:
 	http://jsonml.org/License.htm
@@ -79,8 +79,8 @@ if (!Array.prototype.parseJsonML) {
 			// for each attributeName
 			for (var an in a) {
 				// attributeValue
-				var av = a[an];
-				if (an && "string" === typeof av) {
+				var av = String(a[an]);
+				if (an && av) {
 					an = am[an.toLowerCase()] || an;
 					if (an === "style") {
 						if ("undefined" !== typeof el.style.cssText) {

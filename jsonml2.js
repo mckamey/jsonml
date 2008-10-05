@@ -4,7 +4,7 @@
 	JsonML support
 
 	Created: 2006-11-09-0116
-	Modified: 2008-09-07-1233
+	Modified: 2008-10-04-2024
 
 	Copyright (c)2006-2008 Stephen M. McKamey
 	Distributed under an open-source license: http://jsonml.org/license
@@ -76,13 +76,13 @@ JsonML.parse = function(/*JsonML*/ jml, /*element function(element)*/ filter) {
 	};
 
 	//addAttributes
-	/*void*/ function aa(/*element*/ el, /*Object*/ a) {
+	/*void*/ function aa(/*DOM*/ el, /*object*/ a) {
 		// for each attributeName
 		for (var an in a) {
 			if (a.hasOwnProperty(an)) {
 				// attributeValue
-				var av = a[an];
-				if (an && "string" === typeof av) {
+				var av = String(a[an]);
+				if (an && av) {
 					an = am[an.toLowerCase()] || an;
 					if (an === "style") {
 						if ("undefined" !== typeof el.style.cssText) {
@@ -107,7 +107,7 @@ JsonML.parse = function(/*JsonML*/ jml, /*element function(element)*/ filter) {
 	}
 
 	//appendChild
-	/*void*/ function ac(/*element*/ el, /*Array or String*/ c) {
+	/*void*/ function ac(/*DOM*/ el, /*DOM*/ c) {
 		var ct, tb;
 		if (c) {
 			if (el.tagName && el.tagName.toLowerCase() === "table" && el.tBodies) {
@@ -134,7 +134,7 @@ JsonML.parse = function(/*JsonML*/ jml, /*element function(element)*/ filter) {
 	}
 
 	//JsonML.parse
-	/*element*/ function p(/*JsonML*/ jml) {
+	/*DOM*/ function p(/*JsonML*/ jml) {
 		if (!jml) {
 			return null;
 		}
