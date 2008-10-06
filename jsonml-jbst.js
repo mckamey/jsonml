@@ -19,7 +19,7 @@ if ("undefined" === typeof window.JsonML) {
 	window.JsonML = {};
 }
 
-JsonML.BST = function(/*JsonML+BST*/ jbst) {
+JsonML.BST = function(/*JBST*/ jbst) {
 	var self = this;
 
 	// unique counter for generated method names
@@ -31,9 +31,9 @@ JsonML.BST = function(/*JsonML+BST*/ jbst) {
 	// t: current template node being data bound
 	// d: current data item being bound
 	// n: index of current data item
-	// j: nested JsonML+BST template
-	/*object*/ function db(/*JsonML+BST*/ t, /*object*/ d, /*int*/ n, /*JsonML+BST*/ j) {
-		// process JsonML+BST node
+	// j: nested JBST template
+	/*object*/ function db(/*JBST*/ t, /*object*/ d, /*int*/ n, /*JBST*/ j) {
+		// process JBST node
 		if (t) {
 			if ("function" === typeof t) {
 				// temporary method name using a counter to
@@ -97,7 +97,7 @@ JsonML.BST = function(/*JsonML+BST*/ jbst) {
 
 	// the publicly exposed instance method
 	// combines JBST and JSON to produce JsonML
-	/*JsonML*/ this.dataBind = function(/*object*/ data, /*int*/ index, /*JsonML+BST*/ inner) {
+	/*JsonML*/ this.dataBind = function(/*object*/ data, /*int*/ index, /*JBST*/ inner) {
 		if (data instanceof Array) {
 			// create a document fragment to hold list
 			var o = [""];
