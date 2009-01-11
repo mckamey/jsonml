@@ -6,7 +6,7 @@
 	Created: 2007-02-15-2235
 	Modified: 2008-08-31-2206
 
-	Copyright (c)2006-2008 Stephen M. McKamey
+	Copyright (c)2006-2009 Stephen M. McKamey
 	Distributed under an open-source license: http://jsonml.org/license
 */
 

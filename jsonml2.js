@@ -6,7 +6,7 @@
 	Created: 2006-11-09-0116
 	Modified: 2008-10-04-2024
 
-	Copyright (c)2006-2008 Stephen M. McKamey
+	Copyright (c)2006-2009 Stephen M. McKamey
 	Distributed under an open-source license: http://jsonml.org/license
 
     This file creates a global JsonML object containing this method:

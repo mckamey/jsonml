@@ -6,7 +6,7 @@
 	Created: 2008-07-28-2337
 	Modified: 2008-10-04-2024
 
-	Copyright (c)2006-2008 Stephen M. McKamey
+	Copyright (c)2006-2009 Stephen M. McKamey
 	Distributed under an open-source license: http://jsonml.org/license
 
     This file creates a JsonML.BST type containing this method:
