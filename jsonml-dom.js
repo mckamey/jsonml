@@ -13,6 +13,7 @@
 if ("undefined" === typeof window.JsonML) {
 	window.JsonML = {};
 }
+
 /*JsonML*/ JsonML.parseDOM = function(/*DOM*/ elem) {
 	if (!elem) {
 		return null;
