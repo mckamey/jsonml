@@ -4,7 +4,7 @@
 	JsonML + Browser-Side Templating (JBST) support
 
 	Created: 2008-07-28-2337
-	Modified: 2008-10-04-2024
+	Modified: 2009-01-19-1851
 
 	Copyright (c)2006-2009 Stephen M. McKamey
 	Distributed under an open-source license: http://jsonml.org/license
@@ -32,6 +32,7 @@ JsonML.BST = function(/*JBST*/ jbst) {
 	// d: current data item being bound
 	// n: index of current data item
 	// j: nested JBST template
+	// returns: JsonML nodes
 	/*object*/ function db(/*JBST*/ t, /*object*/ d, /*int*/ n, /*JBST*/ j) {
 		// process JBST node
 		if (t) {
@@ -64,15 +65,30 @@ JsonML.BST = function(/*JBST*/ jbst) {
 					// result
 					var r = db(t[i], d, n, j);
 					if (r instanceof Array && r.length && r[0] === "") {
-						// result was multiple JsonML trees
-						r.shift();
-						o = o.concat(r);
+						// result was multiple JsonML trees (documentFragment)
+						r.shift();// remove fragment ident
+						o = o.concat(r); // directly append children
 					} else if ("object" === typeof r) {
-						// result was a JsonML tree
+						// result was a JsonML node (attributes or children)
 						o.push(r);
 					} else if ("undefined" !== typeof r && r !== null) {
 						// must convert to string or JsonML will discard
 						o.push(String(r));
+					}
+				}
+
+				// if o has attributes, check for JBST commands
+				if (o.length > 1 && ("object" === typeof o[1]) && !(o[1] instanceof Array)) {
+					// visibility JBST command
+					var c = o[1]["jbst:visible"];
+					if ("undefined" !== typeof c) {
+						// must match exactly
+						if (String(c) === "false") {
+							// suppress rendering of entire subtree
+							return "";
+						}
+						// remove attribute
+						delete o[1]["jbst:visible"];
 					}
 				}
 				return o;
@@ -84,7 +100,14 @@ JsonML.BST = function(/*JBST*/ jbst) {
 				// for each property in node
 				for (var p in t) {
 					if (t.hasOwnProperty(p)) {
-						o[p] = String(db(t[p], d, n, j));
+						// property value
+						var v = String(db(t[p], d, n, j));
+						if (p && p.toLowerCase().indexOf("jbst:") === 0) {
+							// normalize JBST command names
+							o[p.toLowerCase()] = v;
+						} else {
+							o[p] = v;
+						}
 					}
 				}
 				return o;
