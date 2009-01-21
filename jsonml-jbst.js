@@ -100,14 +100,7 @@ JsonML.BST = function(/*JBST*/ jbst) {
 				// for each property in node
 				for (var p in t) {
 					if (t.hasOwnProperty(p)) {
-						// property value
-						var v = String(db(t[p], d, n, j));
-						if (p && p.toLowerCase().indexOf("jbst:") === 0) {
-							// normalize JBST command names
-							o[p.toLowerCase()] = v;
-						} else {
-							o[p] = v;
-						}
+						o[p] = String(db(t[p], d, n, j));
 					}
 				}
 				return o;
