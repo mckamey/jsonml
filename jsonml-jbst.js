@@ -4,7 +4,7 @@
 	JsonML + Browser-Side Templating (JBST) support
 
 	Created: 2008-07-28-2337
-	Modified: 2009-01-19-1851
+	Modified: 2009-02-14-1059
 
 	Copyright (c)2006-2009 Stephen M. McKamey
 	Distributed under an open-source license: http://jsonml.org/license
@@ -97,10 +97,14 @@ JsonML.BST = function(/*JBST*/ jbst) {
 			if ("object" === typeof t) {
 				// output object
 				o = {};
-				// for each property in node
+				// for each property in template node
 				for (var p in t) {
 					if (t.hasOwnProperty(p)) {
-						o[p] = String(db(t[p], d, n, j));
+						// evaluate property's value
+						var v = db(t[p], d, n, j);
+						if ("undefined" !== typeof v && v !== null) {
+							o[p] = String(v);
+						}
 					}
 				}
 				return o;
