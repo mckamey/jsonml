@@ -3,7 +3,7 @@
 		JsonML.xslt
 
 		Created: 2006-11-15-0551
-		Modified: 2008-06-30-0846
+		Modified: 2009-02-14-0927
 
 		Released under an open-source license:
 		http://jsonml.org/License.htm
@@ -102,7 +102,7 @@
 		</xsl:if>
 
 		<!-- child elements and text-nodes -->
-		<xsl:for-each select="*|text()|comment()">
+		<xsl:for-each select="*|text()">
 			<xsl:value-of select="$VALUE_DELIM" />
 			<xsl:apply-templates select="." />
 		</xsl:for-each>
@@ -112,7 +112,6 @@
 
 	<!-- text-nodes -->
 	<xsl:template match="text()">
-		<xsl:value-of select="$VALUE_DELIM" />
 		<xsl:call-template name="escape-string">
 			<xsl:with-param name="value"
 							select="." />
