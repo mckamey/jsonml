@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <!--
-		JsonML.xsl
+		JsonML.xslt
 
 		Created: 2006-11-15-0551
 		Modified: 2008-06-30-0846
