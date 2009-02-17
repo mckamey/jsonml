@@ -128,7 +128,7 @@ JsonML.BST = function(/*JBST*/ jbst) {
 			}
 			return o;
 		} else {
-			// data is singular to apply template once
+			// data is singular so apply template once
 			return db(jbst, data, index, inner);
 		}
 	};
