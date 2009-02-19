@@ -150,18 +150,6 @@ if ("undefined" === typeof window.JsonML) {
 			if (typeof(jml) === "string") {
 				return document.createTextNode(jml);
 			}
-			if (jml instanceof Unparsed) {
-				var u = document.createDocumentFragment ?
-					document.createDocumentFragment() :
-					document.createElement("");
-				var d = document.createElement("div");
-				d.innerHTML = jml.value;
-				while (d.firstChild) {
-					u.appendChild(d.firstChild);
-				}
-				return u;
-			}
-
 			if (!(jml instanceof Array) || !jml.length || "string" !== typeof jml[0]) {
 				throw new Error("JsonML.parse: invalid JsonML tree");
 			}
@@ -200,6 +188,8 @@ if ("undefined" === typeof window.JsonML) {
 							// append children
 							ac(el, p(jml[i]));
 						}
+					} else if (jml[i] instanceof Unparsed) {
+						el.innerHTML += jml[i].value;
 					} else if ("object" === typeof jml[i] && !css) {
 						// add attributes
 						aa(el, jml[i]);
