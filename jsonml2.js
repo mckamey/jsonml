@@ -155,7 +155,7 @@ if ("undefined" === typeof window.JsonML) {
 					document.createDocumentFragment() :
 					document.createElement("");
 				var d = document.createElement("div");
-				d.innerHTML = jml;//.value;
+				d.innerHTML = jml.value;
 				while (d.firstChild) {
 					u.appendChild(d.firstChild);
 				}
