@@ -62,7 +62,7 @@ if ("undefined" === typeof window.JsonML) {
 		this.value = value;
 	}
 
-	JsonML.parse = function(/*JsonML*/ jml, /*element function(element)*/ filter) {
+	JsonML.parse = function(/*JsonML*/ jml, /*DOM function(DOM)*/ filter) {
 
 		//attribute name mapping
 		var am = {

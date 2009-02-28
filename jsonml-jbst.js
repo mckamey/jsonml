@@ -4,14 +4,26 @@
 	JsonML + Browser-Side Templating (JBST) support
 
 	Created: 2008-07-28-2337
-	Modified: 2009-02-14-1059
+	Modified: 2009-02-28-0902
 
 	Copyright (c)2006-2009 Stephen M. McKamey
 	Distributed under an open-source license: http://jsonml.org/license
 
-    This file creates a JsonML.BST type containing this method:
+    This file creates a JsonML.BST type containing these methods:
 
-	new JsonML.BST(template).dataBind(data)
+		// JBST + JSON => JsonML
+		var jsonml = new JsonML.BST(jbst).dataBind(data);
+
+		// JBST + JSON => DOM
+		var dom = new JsonML.BST(jbst).bind(data);
+
+		Implement filter to intercept and perform automatic filtering of the resulting DOM tree while binding:
+		JsonML.BST.filter = function (element) {
+			if (condition) {
+				return document.createElement("foo");
+			}
+			return element;
+		};
 */
 
 /* namespace JsonML */
@@ -20,9 +32,13 @@ if ("undefined" === typeof window.JsonML) {
 }
 
 JsonML.BST = function(/*JBST*/ jbst) {
+	if (jbst instanceof JsonML.BST) {
+		return jbst;
+	}
+
 	var self = this;
 
-	// unique counter for generated method names
+	// unique id for generated method names
 	var g = 0;
 
 	// recursively applies dataBind to all nodes of the template graph
@@ -117,7 +133,7 @@ JsonML.BST = function(/*JBST*/ jbst) {
 
 	// the publicly exposed instance method
 	// combines JBST and JSON to produce JsonML
-	/*JsonML*/ this.dataBind = function(/*object*/ data, /*int*/ index, /*JBST*/ inner) {
+	/*JsonML*/ self.dataBind = function(/*object*/ data, /*int*/ index, /*JBST*/ inner) {
 		if (data instanceof Array) {
 			// create a document fragment to hold list
 			var o = [""];
@@ -132,4 +148,17 @@ JsonML.BST = function(/*JBST*/ jbst) {
 			return db(jbst, data, index, inner);
 		}
 	};
+
+	/* JBST + JSON => JsonML => DOM */
+	/*DOM*/ self.bind = function(/*object*/ data, /*int*/ index, /*JBST*/ inner) {
+
+		// databind JSON data to a JBST template, resulting in a JsonML representation
+		var jml = self.dataBind(data, index, inner);
+
+		// hydrate the resulting JsonML
+		return JsonML.parse(jml, JsonML.BST.filter);
+	};
 };
+
+// override this to perform default filtering of the resulting DOM tree
+/*DOM function(DOM)*/ JsonML.BST.filter = null;
