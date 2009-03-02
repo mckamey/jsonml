@@ -12,10 +12,10 @@
     This file creates a JsonML.BST type containing these methods:
 
 		// JBST + JSON => JsonML
-		var jsonml = new JsonML.BST(jbst).dataBind(data);
+		var jsonml = JsonML.BST(jbst).dataBind(data);
 
 		// JBST + JSON => DOM
-		var dom = new JsonML.BST(jbst).bind(data);
+		var dom = JsonML.BST(jbst).bind(data);
 
 		Implement filter to intercept and perform automatic filtering of the resulting DOM tree while binding:
 		JsonML.BST.filter = function (element) {
@@ -31,11 +31,16 @@ if ("undefined" === typeof window.JsonML) {
 	window.JsonML = {};
 }
 
+/* wrapper */
 JsonML.BST = function(/*JBST*/ jbst) {
-	if (jbst instanceof JsonML.BST) {
+	if (jbst instanceof JsonML.BST.init) {
 		return jbst;
 	}
+	return new JsonML.BST.init(jbst);
+};
 
+/* ctor */
+JsonML.BST.init = function(/*JBST*/ jbst) {
 	var self = this;
 
 	// unique id for generated method names
@@ -160,5 +165,5 @@ JsonML.BST = function(/*JBST*/ jbst) {
 	};
 };
 
-// override this to perform default filtering of the resulting DOM tree
+/* override this to perform default filtering of the resulting DOM tree */
 /*DOM function(DOM)*/ JsonML.BST.filter = null;
