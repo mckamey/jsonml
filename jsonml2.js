@@ -4,7 +4,7 @@
 	JsonML support
 
 	Created: 2006-11-09-0116
-	Modified: 2009-02-19-0937
+	Modified: 2009-03-03-0811
 
 	Copyright (c)2006-2009 Stephen M. McKamey
 	Distributed under an open-source license: http://jsonml.org/license
@@ -142,13 +142,37 @@ if ("undefined" === typeof window.JsonML) {
 			}
 		}
 
+		//unparsed
+		/*DOM*/ function u(/*string*/ s) {
+			if (/^<(\w+)\s*\/?>$/.exec(s)) {
+				return document.createElement(s);
+			}
+
+			// wrapper
+			var w = document.createElement("div");
+			w.innerHTML = s;
+
+			// create a document fragment to hold elements
+			var f = document.createDocumentFragment ?
+				document.createDocumentFragment() :
+				document.createElement("");
+
+			while (w.firstChild) {
+				f.appendChild(w.firstChild);
+			}
+			return f;
+		}
+
 		//JsonML.parse
 		/*DOM*/ function p(/*JsonML*/ jml) {
 			if (!jml) {
 				return null;
 			}
-			if (typeof(jml) === "string") {
+			if ("string" === typeof jml) {
 				return document.createTextNode(jml);
+			}
+			if (jml instanceof Unparsed) {
+				return u(jml.value);
 			}
 			if (!(jml instanceof Array) || !jml.length || "string" !== typeof jml[0]) {
 				throw new Error("JsonML.parse: invalid JsonML tree");
