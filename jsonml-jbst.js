@@ -60,21 +60,22 @@ JsonML.BST.init = function(/*JBST*/ jbst) {
 			if ("function" === typeof t) {
 				// temporary method name using a counter to
 				// avoid collisions when recursively calling
-				var m = "$jbst."+(g++);
+				var m = "$$jbst_"+(g++);
 				try {
 					// setup context for code block
 					self[m] = t;
 					self.data = d;
-					self.jbst = j;
 					self.index = isFinite(n) ? Number(n) : NaN;
+					self.$jbst = j;
 					// execute in the context of template as "this"
 					return self[m]();
 				} finally {
-					g--;
-					delete self[m];
-					delete self.data;
-					delete self.jbst;
+					// cleanup contextual members
+					delete self.$jbst;
 					delete self.index;
+					delete self.data;
+					delete self[m];
+					g--;
 				}
 			}
 
