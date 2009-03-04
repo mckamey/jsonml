@@ -4,7 +4,7 @@
 	JsonML + Browser-Side Templating (JBST) support
 
 	Created: 2008-07-28-2337
-	Modified: 2009-03-04-0829
+	Modified: 2009-03-04-0857
 
 	Copyright (c)2006-2009 Stephen M. McKamey
 	Distributed under an open-source license: http://jsonml.org/license
@@ -43,9 +43,6 @@ JsonML.BST = function(/*JBST*/ jbst) {
 JsonML.BST.init = function(/*JBST*/ jbst) {
 	var self = this;
 
-	// unique id for generated method names
-	var g = 0;
-
 	// recursively applies dataBind to all nodes of the template graph
 	// NOTE: it is very important to replace each node with a copy,
 	// otherwise it destroys the original template.
@@ -60,22 +57,18 @@ JsonML.BST.init = function(/*JBST*/ jbst) {
 			if ("function" === typeof t) {
 				// temporary method name using a counter to
 				// avoid collisions when recursively calling
-				var m = "$$jbst_"+(g++);
 				try {
 					// setup context for code block
-					self[m] = t;
 					self.data = d;
 					self.index = isFinite(n) ? Number(n) : NaN;
 					self.$jbst = j;
-					// execute in the context of template as "this"
-					return self[m]();
+					// execute t in the context of self as "this"
+					return t.call(self);
 				} finally {
 					// cleanup contextual members
 					delete self.$jbst;
 					delete self.index;
 					delete self.data;
-					delete self[m];
-					g--;
 				}
 			}
 
