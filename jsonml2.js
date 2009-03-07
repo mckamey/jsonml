@@ -4,7 +4,7 @@
 	JsonML support
 
 	Created: 2006-11-09-0116
-	Modified: 2009-03-03-0811
+	Modified: 2009-03-07-1143
 
 	Copyright (c)2006-2009 Stephen M. McKamey
 	Distributed under an open-source license: http://jsonml.org/license
@@ -106,7 +106,7 @@ if ("undefined" === typeof window.JsonML) {
 								el[an] = new Function(av);
 							}
 						} else {
-						
+
 							// allow direct setting of complex attributes
 							el[an] = av;
 						}
@@ -142,6 +142,25 @@ if ("undefined" === typeof window.JsonML) {
 			}
 		}
 
+		// isWhitespace
+		/*bool*/ function ws(/*DOM*/ n) {
+			return n && (n.nodeType === 3) && (!n.nodeValue || !/\S/.exec(n.nodeValue));
+		}
+
+		// trimWhitespace
+		/*void*/ function tw(/*DOM*/ el) {
+			if (el) {
+				while (ws(el.firstChild)) {
+					// trim leading whitespace text nodes
+					el.removeChild(el.firstChild);
+				}
+				while (ws(el.lastChild)) {
+					// trim trailing whitespace text nodes
+					el.removeChild(el.lastChild);
+				}
+			}
+		}
+
 		//unparsed
 		/*DOM*/ function u(/*string*/ s) {
 			if (/^<(\w+)\s*\/?>$/.exec(s)) {
@@ -151,6 +170,14 @@ if ("undefined" === typeof window.JsonML) {
 			// wrapper
 			var w = document.createElement("div");
 			w.innerHTML = s;
+
+			// trim extraneous whitespace
+			tw(w);
+
+			// eliminate wrapper for single nodes
+			if (w.childNodes.length === 1) {
+				return w.firstChild;
+			}
 
 			// create a document fragment to hold elements
 			var f = document.createDocumentFragment ?
@@ -188,6 +215,14 @@ if ("undefined" === typeof window.JsonML) {
 					document.createElement("");
 				for (i=1; i<jml.length; i++) {
 					ac(f, p(jml[i]));
+				}
+
+				// trim extraneous whitespace
+				tw(f);
+
+				// eliminate wrapper for single nodes
+				if (f.childNodes.length === 1) {
+					return f.firstChild;
 				}
 				return f;
 			}
@@ -230,21 +265,22 @@ if ("undefined" === typeof window.JsonML) {
 				return null;
 			}
 
+			// trim extraneous whitespace
+			tw(el);
 			return (el && "function" === typeof filter) ? filter(el) : el;
 		}
 
 		if (jml instanceof Array) {
 			return p(jml);
-		} else if ("string" === typeof jml) {
-
+		}
+		if ("string" === typeof jml) {
 			try {
 				jml = JSON.parse(jml);
 			} catch (ex) {
 				return null;
 			}
-
 			if (jml instanceof Array) {
-				return JsonML.parse(jml, filter);
+				return p(jml);
 			}
 		}
 		return null;
