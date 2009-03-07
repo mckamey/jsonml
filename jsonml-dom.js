@@ -69,23 +69,3 @@ if ("undefined" === typeof window.JsonML) {
 	jml[0] = "";
 	return jml;
 };
-
-/*legacy adapter*/
-JsonML.Response = function() {
-	// response buffer
-	/*string*/ var r = "";
-
-	// accomodate various legacy interfaces
-	/*void*/ this.Write = this.write = this.print = this.println = 
-			function(/*string*/ value) {
-				r += String(value);
-			};
-
-	/*void*/ this.Clear = this.clear = function() {
-		r = "";
-	};
-
-	/*JsonML*/ this.render = function() {
-		return JsonML.parseHTML(r);
-	};
-};
