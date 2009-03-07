@@ -49,9 +49,10 @@ JsonML.BST.init = function(/*JBST*/ jbst) {
 	// t: current template node being data bound
 	// d: current data item being bound
 	// n: index of current data item
+	// l: count of current set of data items
 	// j: nested JBST template
 	// returns: JsonML nodes
-	/*object*/ function db(/*JBST*/ t, /*object*/ d, /*int*/ n, /*JBST*/ j) {
+	/*object*/ function db(/*JBST*/ t, /*object*/ d, /*int*/ n, /*int*/ l, /*JBST*/ j) {
 		// process JBST node
 		if (t) {
 			if ("function" === typeof t) {
@@ -61,12 +62,14 @@ JsonML.BST.init = function(/*JBST*/ jbst) {
 					// setup context for code block
 					self.data = d;
 					self.index = isFinite(n) ? Number(n) : NaN;
+					self.count = isFinite(l) ? Number(l) : NaN;
 					self.$jbst = j;
 					// execute t in the context of self as "this"
 					return t.call(self);
 				} finally {
 					// cleanup contextual members
 					delete self.$jbst;
+					delete self.count;
 					delete self.index;
 					delete self.data;
 				}
@@ -78,7 +81,7 @@ JsonML.BST.init = function(/*JBST*/ jbst) {
 				o = [];
 				for (var i=0; i<t.length; i++) {
 					// result
-					var r = db(t[i], d, n, j);
+					var r = db(t[i], d, n, l, j);
 					if (r instanceof Array && r.length && r[0] === "") {
 						// result was multiple JsonML trees (documentFragment)
 						r.shift();// remove fragment ident
@@ -116,7 +119,7 @@ JsonML.BST.init = function(/*JBST*/ jbst) {
 				for (var p in t) {
 					if (t.hasOwnProperty(p)) {
 						// evaluate property's value
-						var v = db(t[p], d, n, j);
+						var v = db(t[p], d, n, l, j);
 						if ("undefined" !== typeof v && v !== null) {
 							o[p] = String(v);
 						}
@@ -132,27 +135,28 @@ JsonML.BST.init = function(/*JBST*/ jbst) {
 
 	// the publicly exposed instance method
 	// combines JBST and JSON to produce JsonML
-	/*JsonML*/ self.dataBind = function(/*object*/ data, /*int*/ index, /*JBST*/ inner) {
+	/*JsonML*/ self.dataBind = function(/*object*/ data, /*int*/ index, /*int*/ count, /*JBST*/ inner) {
 		if (data instanceof Array) {
 			// create a document fragment to hold list
 			var o = [""];
 
-			for (var i=0; i<data.length; i++) {
+			count = data.length;
+			for (var i=0; i<count; i++) {
 				// apply template to each item in array
-				o.push(db(jbst, data[i], i, inner));
+				o.push(db(jbst, data[i], i, count, inner));
 			}
 			return o;
 		} else {
 			// data is singular so apply template once
-			return db(jbst, data, index, inner);
+			return db(jbst, data, index, count, inner);
 		}
 	};
 
 	/* JBST + JSON => JsonML => DOM */
-	/*DOM*/ self.bind = function(/*object*/ data, /*int*/ index, /*JBST*/ inner) {
+	/*DOM*/ self.bind = function(/*object*/ data, /*int*/ index, /*int*/ count, /*JBST*/ inner) {
 
 		// databind JSON data to a JBST template, resulting in a JsonML representation
-		var jml = self.dataBind(data, index, inner);
+		var jml = self.dataBind(data, index, count, inner);
 
 		// hydrate the resulting JsonML
 		return JsonML.parse(jml, JsonML.BST.filter);
