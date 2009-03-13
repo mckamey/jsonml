@@ -2,7 +2,7 @@
 	JsonML.js
 
 	Created: 2006-11-09-0116
-	Modified: 2008-10-04-2024
+	Modified: 2009-03-13-0845
 
 	Released under an open-source license:
 	http://jsonml.org/License.htm
@@ -75,59 +75,125 @@ if (!Array.prototype.parseJsonML) {
 		};
 
 		//addAttributes
-		/*void*/ function aa(/*DOM*/ el, /*Object*/ a) {
+		/*void*/ function aa(/*DOM*/ el, /*object*/ a) {
 			// for each attributeName
 			for (var an in a) {
-				// attributeValue
-				var av = String(a[an]);
-				if (an && av) {
-					an = am[an.toLowerCase()] || an;
-					if (an === "style") {
-						if ("undefined" !== typeof el.style.cssText) {
-							el.style.cssText = av;
+				if (a.hasOwnProperty(an)) {
+					// attributeValue
+					var av = a[an];
+					if (an && av) {
+						an = am[an.toLowerCase()] || an;
+						if (an === "style") {
+							if ("undefined" !== typeof el.style.cssText) {
+								el.style.cssText = av;
+							} else {
+								el.style = av;
+							}
+						} else if (an === "class") {
+							el.className = av;
+						} else if ("string" === typeof av || "number" === typeof av || "boolean" === typeof av) {
+							el.setAttribute(an, av);
+
+							// TODO: explicitly name these to prevent false positives
+							// in IE cannot set onclick events directly
+							if (an.indexOf('on') === 0 && "function" !== typeof el[an]) {
+								/*jslint evil:true */
+								el[an] = new Function(av);
+								/*jslint evil:false */
+							}
 						} else {
-							el.style = av;
+
+							// allow direct setting of complex properties
+							el[an] = av;
 						}
-					} else if (an === "class") {
-						el.className = av;
-					} else {
-						el.setAttribute(an, av);
 					}
 				}
 			}
 		}
 
 		//appendChild
-		/*void*/ function ac(/*DOM*/ el, /*Array or String*/ c) {
+		/*void*/ function ac(/*DOM*/ el, /*DOM*/ c) {
 			var ct, tb;
 			if (c) {
 				if (el.tagName && el.tagName.toLowerCase() === "table" && el.tBodies) {
-					// in IE must explicitly nest TDs in TBODY
-					ct = c.tagName ? c.tagName.toLowerCase() : null;// child tagName
-					if (ct && ct!=="tbody" && ct!=="thead") {
+					if (!c.tagName) {
+						return;
+					}
+					// in IE must explicitly nest TRs in TBODY
+					ct = c.tagName.toLowerCase();// child tagName
+					if (ct && ct !== "tbody" && ct !== "thead") {
 						// insert in last tbody
-						tb = el.tBodies.length>0 ? el.tBodies[el.tBodies.length-1] : null;// tBody
+						tb = el.tBodies.length > 0 ? el.tBodies[el.tBodies.length-1] : null;// tBody
 						if (!tb) {
-							tb = document.createElement("tbody");
+							tb = document.createElement(ct==="th" ? "thead" : "tbody");
 							el.appendChild(tb);
 						}
 						tb.appendChild(c);
+					} else if (el.canHaveChildren !== false) {
+						el.appendChild(c);
 					}
-				} else {
+				} else if (el.canHaveChildren !== false) {
 					el.appendChild(c);
 				}
 			}
 		}
 
-		//parseJsonML
+		// isWhitespace
+		/*bool*/ function ws(/*DOM*/ n) {
+			return n && (n.nodeType === 3) && (!n.nodeValue || !/\S/.exec(n.nodeValue));
+		}
+
+		// trimWhitespace
+		/*void*/ function tw(/*DOM*/ el) {
+			if (el) {
+				while (ws(el.firstChild)) {
+					// trim leading whitespace text nodes
+					el.removeChild(el.firstChild);
+				}
+				while (ws(el.lastChild)) {
+					// trim trailing whitespace text nodes
+					el.removeChild(el.lastChild);
+				}
+			}
+		}
+
+		//unparsed
+		/*DOM*/ function u(/*string*/ s) {
+			if (/^<(\w+)\s*\/?>$/.exec(s)) {
+				return document.createElement(s);
+			}
+
+			// wrapper
+			var w = document.createElement("div");
+			w.innerHTML = s;
+
+			// trim extraneous whitespace
+			tw(w);
+
+			// eliminate wrapper for single nodes
+			if (w.childNodes.length === 1) {
+				return w.firstChild;
+			}
+
+			// create a document fragment to hold elements
+			var f = document.createDocumentFragment ?
+				document.createDocumentFragment() :
+				document.createElement("");
+
+			while (w.firstChild) {
+				f.appendChild(w.firstChild);
+			}
+			return f;
+		}
+
+		//JsonML.parse
 		/*DOM*/ function p(/*JsonML*/ jml) {
 			if (!jml) {
 				return null;
 			}
-			if (typeof(jml) === "string") {
+			if ("string" === typeof jml) {
 				return document.createTextNode(jml);
 			}
-
 			if (!(jml instanceof Array) || !jml.length || "string" !== typeof jml[0]) {
 				throw new Error("JsonML.parse: invalid JsonML tree");
 			}
@@ -143,6 +209,14 @@ if (!Array.prototype.parseJsonML) {
 				for (i=1; i<jml.length; i++) {
 					ac(f, p(jml[i]));
 				}
+
+				// trim extraneous whitespace
+				tw(f);
+
+				// eliminate wrapper for single nodes
+				if (f.childNodes.length === 1) {
+					return f.firstChild;
+				}
 				return f;
 			}
 
@@ -156,7 +230,7 @@ if (!Array.prototype.parseJsonML) {
 				el = x ? null : document.createElement(t);
 			}
 
-			for (var i=1; i<jml.length; i++) {
+			for (i=1; i<jml.length; i++) {
 				if (!x) {
 					if (jml[i] instanceof Array || "string" === typeof jml[i]) {
 						if (css) {
@@ -182,6 +256,8 @@ if (!Array.prototype.parseJsonML) {
 				return null;
 			}
 
+			// trim extraneous whitespace
+			tw(el);
 			return (el && "function" === typeof filter) ? filter(el) : el;
 		}
 
