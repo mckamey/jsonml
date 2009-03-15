@@ -4,7 +4,7 @@
 	JsonML support
 
 	Created: 2006-11-09-0116
-	Modified: 2009-03-13-0845
+	Modified: 2009-03-14-1713
 
 	Copyright (c)2006-2009 Stephen M. McKamey
 	Distributed under an open-source license: http://jsonml.org/license
@@ -80,6 +80,12 @@ if ("undefined" === typeof window.JsonML) {
 			// can add more attributes here as needed
 		};
 
+		// attribute duplicates
+		var ad = {
+			enctype : "encoding"
+			// can add more attributes here as needed
+		};
+
 		//addAttributes
 		/*void*/ function aa(/*DOM*/ el, /*object*/ a) {
 			// for each attributeName
@@ -100,17 +106,37 @@ if ("undefined" === typeof window.JsonML) {
 						} else if ("string" === typeof av || "number" === typeof av || "boolean" === typeof av) {
 							el.setAttribute(an, av);
 
+							// also set duplicated attributes
+							if (ad[an]) {
+								el.setAttribute(ad[an], av);
+							}
+
 							// TODO: explicitly name these to prevent false positives
 							// in IE cannot set onclick events directly
 							if (an.indexOf('on') === 0 && "function" !== typeof el[an]) {
 								/*jslint evil:true */
 								el[an] = new Function(av);
+
+								// also set duplicated attributes
+								if (ad[an]) {
+									el[ad[an]] = new Function(av);
+								}
 								/*jslint evil:false */
+							} else {
+								// also set duplicated attributes
+								if (ad[an]) {
+									el.setAttribute(ad[an], av);
+								}
 							}
 						} else {
 
 							// allow direct setting of complex properties
 							el[an] = av;
+
+							// also set duplicated attributes
+							if (ad[an]) {
+								el[ad[an]] = av;
+							}
 						}
 					}
 				}
