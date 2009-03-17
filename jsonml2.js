@@ -4,7 +4,7 @@
 	JsonML support
 
 	Created: 2006-11-09-0116
-	Modified: 2009-03-14-1713
+	Modified: 2009-03-16-2047
 
 	Copyright (c)2006-2009 Stephen M. McKamey
 	Distributed under an open-source license: http://jsonml.org/license
@@ -34,7 +34,7 @@
             var myUI = JsonML.parse(myUITemplate, function (elem) {
 				if (elem.className.indexOf("Remove-Me") >= 0) {
 					// this will remove from resulting DOM tree
-					return undefined;
+					return null;
 				}
 
 				if (elem.tagName && elem.tagName.toLowerCase() === "a" &&
@@ -87,7 +87,18 @@ if ("undefined" === typeof window.JsonML) {
 		};
 
 		//addAttributes
-		/*void*/ function aa(/*DOM*/ el, /*object*/ a) {
+		/*DOM*/ function aa(/*DOM*/ el, /*object*/ a) {
+			if (a.name) {
+				try {
+					// IE fix for not being able to programatically change the name attribute
+					var el2 = document.createElement("<"+el.tagName+" name='"+a.name+"'>");
+					// fix for Opera 8.5 and Netscape 7.1 creating malformed elements
+					if (el.tagName === el2.tagName) {
+						el = el2;
+					}
+				} catch (ex) { }
+			}
+
 			// for each attributeName
 			for (var an in a) {
 				if (a.hasOwnProperty(an)) {
@@ -141,6 +152,7 @@ if ("undefined" === typeof window.JsonML) {
 					}
 				}
 			}
+			return el;
 		}
 
 		//appendChild
@@ -279,7 +291,7 @@ if ("undefined" === typeof window.JsonML) {
 						el.innerHTML += jml[i].value;
 					} else if ("object" === typeof jml[i] && !css) {
 						// add attributes
-						aa(el, jml[i]);
+						el = aa(el, jml[i]);
 					}
 				//} else if (typeof(jml[i]) === "string") {
 					/*	JSLint: "eval is evil"
