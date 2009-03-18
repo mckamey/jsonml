@@ -2,7 +2,7 @@
 	JsonML.js
 
 	Created: 2006-11-09-0116
-	Modified: 2009-03-13-0845
+	Modified: 2009-03-16-0734
 
 	Released under an open-source license:
 	http://jsonml.org/License.htm
@@ -36,7 +36,7 @@
             var myUI = myUITemplate.parseJsonML(function (elem) {
 				if (elem.className.indexOf("Remove-Me") >= 0) {
 					// this will remove from resulting DOM tree
-					return undefined;
+					return null;
 				}
 
 				if (elem.tagName && elem.tagName.toLowerCase() === "a" &&
@@ -74,8 +74,25 @@ if (!Array.prototype.parseJsonML) {
 			// can add more attributes here as needed
 		};
 
+		// attribute duplicates
+		var ad = {
+			enctype : "encoding"
+			// can add more attributes here as needed
+		};
+
 		//addAttributes
-		/*void*/ function aa(/*DOM*/ el, /*object*/ a) {
+		/*DOM*/ function aa(/*DOM*/ el, /*object*/ a) {
+			if (a.name && el.readyState) {
+				try {
+					// IE fix for not being able to programatically change the name attribute
+					var el2 = document.createElement("<"+el.tagName+" name='"+a.name+"'>");
+					// fix for Opera 8.5 and Netscape 7.1 creating malformed elements
+					if (el.tagName === el2.tagName) {
+						el = el2;
+					}
+				} catch (ex) { }
+			}
+
 			// for each attributeName
 			for (var an in a) {
 				if (a.hasOwnProperty(an)) {
@@ -99,16 +116,32 @@ if (!Array.prototype.parseJsonML) {
 							if (an.indexOf('on') === 0 && "function" !== typeof el[an]) {
 								/*jslint evil:true */
 								el[an] = new Function(av);
+
+								// also set duplicated attributes
+								if (ad[an]) {
+									el[ad[an]] = new Function(av);
+								}
 								/*jslint evil:false */
+							} else {
+								// also set duplicated attributes
+								if (ad[an]) {
+									el.setAttribute(ad[an], av);
+								}
 							}
 						} else {
 
 							// allow direct setting of complex properties
 							el[an] = av;
+
+							// also set duplicated attributes
+							if (ad[an]) {
+								el[ad[an]] = av;
+							}
 						}
 					}
 				}
 			}
+			return el;
 		}
 
 		//appendChild
@@ -155,35 +188,6 @@ if (!Array.prototype.parseJsonML) {
 					el.removeChild(el.lastChild);
 				}
 			}
-		}
-
-		//unparsed
-		/*DOM*/ function u(/*string*/ s) {
-			if (/^<(\w+)\s*\/?>$/.exec(s)) {
-				return document.createElement(s);
-			}
-
-			// wrapper
-			var w = document.createElement("div");
-			w.innerHTML = s;
-
-			// trim extraneous whitespace
-			tw(w);
-
-			// eliminate wrapper for single nodes
-			if (w.childNodes.length === 1) {
-				return w.firstChild;
-			}
-
-			// create a document fragment to hold elements
-			var f = document.createDocumentFragment ?
-				document.createDocumentFragment() :
-				document.createElement("");
-
-			while (w.firstChild) {
-				f.appendChild(w.firstChild);
-			}
-			return f;
 		}
 
 		//JsonML.parse
@@ -240,9 +244,9 @@ if (!Array.prototype.parseJsonML) {
 							// append children
 							ac(el, p(jml[i]));
 						}
-					} else if ("object" === typeof jml[i] && !css) {
+					} else if ("object" === typeof jml[i] && el.nodeType === 1) {
 						// add attributes
-						aa(el, jml[i]);
+						el = aa(el, jml[i]);
 					}
 				//} else if (typeof(jml[i]) === "string") {
 					/*	JSLint: "eval is evil"
