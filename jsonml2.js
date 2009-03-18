@@ -4,7 +4,7 @@
 	JsonML support
 
 	Created: 2006-11-09-0116
-	Modified: 2009-03-16-2047
+	Modified: 2009-03-18-0734
 
 	Copyright (c)2006-2009 Stephen M. McKamey
 	Distributed under an open-source license: http://jsonml.org/license
@@ -203,10 +203,6 @@ if ("undefined" === typeof window.JsonML) {
 
 		//unparsed
 		/*DOM*/ function u(/*string*/ s) {
-			if (/^<(\w+)\s*\/?>$/.exec(s)) {
-				return document.createElement(s);
-			}
-
 			// wrapper
 			var w = document.createElement("div");
 			w.innerHTML = s;
@@ -288,7 +284,7 @@ if ("undefined" === typeof window.JsonML) {
 							ac(el, p(jml[i]));
 						}
 					} else if (jml[i] instanceof Unparsed) {
-						el.innerHTML += jml[i].value;
+						ac(el, u(jml[i].value));
 					} else if ("object" === typeof jml[i] && !css) {
 						// add attributes
 						el = aa(el, jml[i]);
