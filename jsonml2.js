@@ -117,11 +117,6 @@ if ("undefined" === typeof window.JsonML) {
 						} else if ("string" === typeof av || "number" === typeof av || "boolean" === typeof av) {
 							el.setAttribute(an, av);
 
-							// also set duplicated attributes
-							if (ad[an]) {
-								el.setAttribute(ad[an], av);
-							}
-
 							// TODO: explicitly name these to prevent false positives
 							// in IE cannot set onclick events directly
 							if (an.indexOf('on') === 0 && "function" !== typeof el[an]) {
