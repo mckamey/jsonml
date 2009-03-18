@@ -88,7 +88,7 @@ if ("undefined" === typeof window.JsonML) {
 
 		//addAttributes
 		/*DOM*/ function aa(/*DOM*/ el, /*object*/ a) {
-			if (a.name) {
+			if (a.name && el.readyState) {
 				try {
 					// IE fix for not being able to programatically change the name attribute
 					var el2 = document.createElement("<"+el.tagName+" name='"+a.name+"'>");
@@ -285,7 +285,7 @@ if ("undefined" === typeof window.JsonML) {
 						}
 					} else if (jml[i] instanceof Unparsed) {
 						ac(el, u(jml[i].value));
-					} else if ("object" === typeof jml[i] && !css) {
+					} else if ("object" === typeof jml[i] && el.nodeType === 1) {
 						// add attributes
 						el = aa(el, jml[i]);
 					}
