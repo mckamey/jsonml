@@ -4,7 +4,7 @@
 	JsonML support
 
 	Created: 2006-11-09-0116
-	Modified: 2009-03-18-0734
+	Modified: 2009-03-24-0854
 
 	Copyright (c)2006-2009 Stephen M. McKamey
 	Distributed under an open-source license: http://jsonml.org/license
@@ -88,7 +88,7 @@ if ("undefined" === typeof window.JsonML) {
 
 		//addAttributes
 		/*DOM*/ function aa(/*DOM*/ el, /*object*/ a) {
-			if (a.name && el.readyState) {
+			if (a.name && document.attachEvent) {
 				try {
 					// IE fix for not being able to programatically change the name attribute
 					var el2 = document.createElement("<"+el.tagName+" name='"+a.name+"'>");
