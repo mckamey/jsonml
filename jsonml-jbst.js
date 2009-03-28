@@ -4,7 +4,7 @@
 	JsonML + Browser-Side Templating (JBST) support
 
 	Created: 2008-07-28-2337
-	Modified: 2009-03-28-1029
+	Modified: 2009-03-28-1208
 
 	Copyright (c)2006-2009 Stephen M. McKamey
 	Distributed under an open-source license: http://jsonml.org/license
@@ -64,11 +64,10 @@ JsonML.BST.init = function(/*JBST*/ jbst) {
 				}
 			}
 			if (c) {
-				// re-assign
-				a[k] = c;
-			} else {
-				delete a[k];
+				// IE doesn't like colon in property names
+				a[k.replace(':', '$')] = c;
 			}
+			delete a[k];
 		}
 	}
 
@@ -168,32 +167,38 @@ JsonML.BST.init = function(/*JBST*/ jbst) {
 		return t;
 	}
 
+	// retrieve and remove method
+	/*function*/ function rm(/*DOM*/ el, /*string*/ k) {
+		// IE doesn't like colon in property names
+		k = k.replace(':', '$');
+
+		var undef, // intentionally left undefined
+			fn = el[k];
+
+		if (fn) {
+			try {
+				delete el[k];
+			} catch (ex) {
+				// sometimes IE doesn't like deleting from DOM
+				el[k] = undef;
+			}
+		}
+		return fn;
+	}
+
 	// JsonML Filter
 	/*DOM*/ function jf(/*DOM*/ el) {
-		var fn = el[jI],
-			undef; // intentionally left undefined
 
 		// execute and remove jbst:oninit method
+		var fn = rm(el, jI);
 		if ("function" === typeof fn) {
-			try {
-				delete el[jI];
-			} catch (e1) {
-				// sometimes IE doesn't like deleting from DOM
-				el[jI] = undef;
-			}
 			// execute in context of element
 			fn.call(el);
 		}
 
 		// execute and remove jbst:onload method
-		fn = el[jL];
+		fn = rm(el, jL);
 		if ("function" === typeof fn) {
-			try {
-				delete el[jL];
-			} catch (e2) {
-				// sometimes IE doesn't like deleting from DOM
-				el[jL] = undef;
-			}
 			// queue up to execute after insertion into parentNode
 			window.setTimeout(function() {
 				// execute in context of element
