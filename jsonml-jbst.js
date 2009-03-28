@@ -4,7 +4,7 @@
 	JsonML + Browser-Side Templating (JBST) support
 
 	Created: 2008-07-28-2337
-	Modified: 2009-03-13-0845
+	Modified: 2009-03-28-1029
 
 	Copyright (c)2006-2009 Stephen M. McKamey
 	Distributed under an open-source license: http://jsonml.org/license
@@ -41,7 +41,36 @@ JsonML.BST = function(/*JBST*/ jbst) {
 
 /* ctor */
 JsonML.BST.init = function(/*JBST*/ jbst) {
-	var self = this;
+	var self = this,
+		jV = "jbst:visible",
+		jI = "jbst:oninit",
+		jL = "jbst:onload";
+
+	// ensures attribute key contains method or is removed
+	// a: attribute object
+	// k: property key
+	/*void*/ function em(/*object*/ a, /*string*/ k) {
+		// callback method
+		var c = a[k];
+		if ("undefined" !== typeof c) {
+			// ensure is method
+			if ("function" !== typeof c) {
+				try {
+					/*jslint evil:true */
+					c = new Function(String(c));
+					/*jslint evil:false */
+				} catch (ex) {
+					c = null;
+				}
+			}
+			if (c) {
+				// re-assign
+				a[k] = c;
+			} else {
+				delete a[k];
+			}
+		}
+	}
 
 	// recursively applies dataBind to all nodes of the template graph
 	// NOTE: it is very important to replace each node with a copy,
@@ -98,16 +127,22 @@ JsonML.BST.init = function(/*JBST*/ jbst) {
 				// if o has attributes, check for JBST commands
 				if (o.length > 1 && ("object" === typeof o[1]) && !(o[1] instanceof Array)) {
 					// visibility JBST command
-					var c = o[1]["jbst:visible"];
+					var c = o[1][jV];
 					if ("undefined" !== typeof c) {
-						// must match exactly
+						// must match exactly string "false" or boolean false
 						if (String(c) === "false") {
 							// suppress rendering of entire subtree
 							return "";
 						}
 						// remove attribute
-						delete o[1]["jbst:visible"];
+						delete o[1][jV];
 					}
+
+					// oninit JBST callback
+					em(o[1], jI);
+
+					// onload JBST callback
+					em(o[1], jL);
 				}
 				return o;
 			}
@@ -131,6 +166,45 @@ JsonML.BST.init = function(/*JBST*/ jbst) {
 
 		// rest are value types, so return node directly
 		return t;
+	}
+
+	// JsonML Filter
+	/*DOM*/ function jf(/*DOM*/ el) {
+		var fn = el[jI],
+			undef; // intentionally left undefined
+
+		// execute and remove jbst:oninit method
+		if ("function" === typeof fn) {
+			try {
+				delete el[jI];
+			} catch (e1) {
+				// sometimes IE doesn't like deleting from DOM
+				el[jI] = undef;
+			}
+			// execute in context of element
+			fn.call(el);
+		}
+
+		// execute and remove jbst:onload method
+		fn = el[jL];
+		if ("function" === typeof fn) {
+			try {
+				delete el[jL];
+			} catch (e2) {
+				// sometimes IE doesn't like deleting from DOM
+				el[jL] = undef;
+			}
+			// queue up to execute after insertion into parentNode
+			window.setTimeout(function() {
+				// execute in context of element
+				fn.call(el);
+				fn = el = null;
+			}, 0);
+		}
+
+		if (JsonML.BST.filter) {
+			return JsonML.BST.filter(el);
+		}
 	}
 
 	// the publicly exposed instance method
@@ -158,8 +232,8 @@ JsonML.BST.init = function(/*JBST*/ jbst) {
 		// databind JSON data to a JBST template, resulting in a JsonML representation
 		var jml = self.dataBind(data, index, count, inner);
 
-		// hydrate the resulting JsonML
-		return JsonML.parse(jml, JsonML.BST.filter);
+		// hydrate the resulting JsonML, executing callbacks, and user-filter
+		return JsonML.parse(jml, jf);
 	};
 };
 
