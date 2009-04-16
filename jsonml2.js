@@ -4,7 +4,7 @@
 	JsonML support
 
 	Created: 2006-11-09-0116
-	Modified: 2009-04-05-1559
+	Modified: 2009-04-16-0812
 
 	Copyright (c)2006-2009 Stephen M. McKamey
 	Distributed under an open-source license: http://jsonml.org/license
@@ -173,6 +173,17 @@ if ("undefined" === typeof window.JsonML) {
 					}
 				} else if (el.canHaveChildren !== false) {
 					el.appendChild(c);
+				} else if (el.tagName && el.tagName.toLowerCase() === "object" &&
+					c.tagName && c.tagName.toLowerCase() === "param") {
+						try {
+							// IE-only path
+							el.appendChild(c);
+						} catch (ex1) {}
+						try {
+							if (el.object) {
+								el.object[c.name] = c.value;
+							}
+						} catch (ex2) {}
 				}
 			}
 		}
