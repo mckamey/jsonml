@@ -175,8 +175,8 @@ if ("undefined" === typeof window.JsonML) {
 					el.appendChild(c);
 				} else if (el.tagName && el.tagName.toLowerCase() === "object" &&
 					c.tagName && c.tagName.toLowerCase() === "param") {
+						// IE-only path
 						try {
-							// IE-only path
 							el.appendChild(c);
 						} catch (ex1) {}
 						try {
