@@ -4,7 +4,7 @@
 	JsonML + Browser-Side Templating (JBST) support
 
 	Created: 2008-07-28-2337
-	Modified: 2009-03-28-1208
+	Modified: 2009-05-02-0943
 
 	Copyright (c)2006-2009 Stephen M. McKamey
 	Distributed under an open-source license: http://jsonml.org/license
@@ -91,12 +91,10 @@ JsonML.BST.init = function(/*JBST*/ jbst) {
 					self.data = d;
 					self.index = isFinite(n) ? Number(n) : NaN;
 					self.count = isFinite(l) ? Number(l) : NaN;
-					self.$jbst = j;
 					// execute t in the context of self as "this"
-					return t.call(self);
+					return t.call(self, j);
 				} finally {
 					// cleanup contextual members
-					delete self.$jbst;
 					delete self.count;
 					delete self.index;
 					delete self.data;
