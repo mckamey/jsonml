@@ -2,7 +2,7 @@
 	JsonML.js
 
 	Created: 2006-11-09-0116
-	Modified: 2009-03-24-0854
+	Modified: 2009-05-20-0719
 
 	Released under an open-source license:
 	http://jsonml.org/License.htm
@@ -150,6 +150,12 @@ if (!Array.prototype.parseJsonML) {
 			if (c) {
 				if (el.tagName && el.tagName.toLowerCase() === "table" && el.tBodies) {
 					if (!c.tagName) {
+						// must unwrap documentFragment for tables
+						if (c.nodeType === 11) {
+							while (c.firstChild) {
+								ac(el, c.removeChild(c.firstChild));
+							}
+						}
 						return;
 					}
 					// in IE must explicitly nest TRs in TBODY
@@ -164,6 +170,17 @@ if (!Array.prototype.parseJsonML) {
 						tb.appendChild(c);
 					} else if (el.canHaveChildren !== false) {
 						el.appendChild(c);
+					} else if (el.tagName && el.tagName.toLowerCase() === "object" &&
+								c.tagName && c.tagName.toLowerCase() === "param") {
+						// IE-only path
+						try {
+							el.appendChild(c);
+						} catch (ex1) {}
+						try {
+							if (el.object) {
+								el.object[c.name] = c.value;
+							}
+						} catch (ex2) {}
 					}
 				} else if (el.canHaveChildren !== false) {
 					el.appendChild(c);
@@ -244,7 +261,7 @@ if (!Array.prototype.parseJsonML) {
 							// append children
 							ac(el, p(jml[i]));
 						}
-					} else if ("object" === typeof jml[i] && el.nodeType === 1) {
+					} else if ("object" === typeof jml[i] && jml[i] !== null && el.nodeType === 1) {
 						// add attributes
 						el = aa(el, jml[i]);
 					}
