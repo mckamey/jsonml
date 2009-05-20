@@ -4,7 +4,7 @@
 	JsonML support
 
 	Created: 2006-11-09-0116
-	Modified: 2009-04-16-0812
+	Modified: 2009-05-20-0719
 
 	Copyright (c)2006-2009 Stephen M. McKamey
 	Distributed under an open-source license: http://jsonml.org/license
@@ -156,6 +156,12 @@ if ("undefined" === typeof window.JsonML) {
 			if (c) {
 				if (el.tagName && el.tagName.toLowerCase() === "table" && el.tBodies) {
 					if (!c.tagName) {
+						// must unwrap documentFragment for tables
+						if (c.nodeType === 11) {
+							while (c.firstChild) {
+								ac(el, c.removeChild(c.firstChild));
+							}
+						}
 						return;
 					}
 					// in IE must explicitly nest TRs in TBODY
