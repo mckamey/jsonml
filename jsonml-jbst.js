@@ -4,7 +4,7 @@
 	JsonML + Browser-Side Templating (JBST) support
 
 	Created: 2008-07-28-2337
-	Modified: 2009-06-28-2011
+	Modified: 2009-06-28-2243
 
 	Copyright (c)2006-2009 Stephen M. McKamey
 	Distributed under an open-source license: http://jsonml.org/license
@@ -71,6 +71,9 @@ JsonML.BST.init = function(/*JBST*/ jbst) {
 		}
 	}
 
+	// appends a child tree to a parent
+	// el: parent element
+	// c: child tree
 	/*void*/ function ac(/*Array*/ el, /*array|object|string*/ c) {
 		if (c instanceof Array && c.length && c[0] === "") {
 			// result was multiple JsonML sub-trees (as documentFragment)
@@ -110,25 +113,32 @@ JsonML.BST.init = function(/*JBST*/ jbst) {
 	/*object*/ function db(/*JBST*/ t, /*object*/ d, /*int*/ n, /*int*/ l, /*JBST*/ j) {
 		// process JBST node
 		if (t) {
+			// output
+			var o;
+
 			if ("function" === typeof t) {
-				// temporary method name using a counter to
-				// avoid collisions when recursively calling
 				try {
 					// setup context for code block
 					self.data = d;
 					self.index = isFinite(n) ? Number(n) : NaN;
 					self.count = isFinite(l) ? Number(l) : NaN;
 					// execute t in the context of self as "this"
-					return t.call(self, j);
+					o = t.call(self, j);
 				} finally {
 					// cleanup contextual members
 					delete self.count;
 					delete self.index;
 					delete self.data;
 				}
+
+				if (o instanceof JsonML.BST.init) {
+					// allow returned JBSTs to recursively bind
+					// useful for creating "switcher" template methods
+					return db(o, d, n, l, j);
+				}
+				return o;
 			}
 
-			var o;
 			if (t instanceof Array) {
 				// output array
 				o = [];
