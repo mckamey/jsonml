@@ -4,7 +4,7 @@
 	JsonML + Browser-Side Templating (JBST) support
 
 	Created: 2008-07-28-2337
-	Modified: 2009-05-02-0943
+	Modified: 2009-06-28-2011
 
 	Copyright (c)2006-2009 Stephen M. McKamey
 	Distributed under an open-source license: http://jsonml.org/license
@@ -71,6 +71,33 @@ JsonML.BST.init = function(/*JBST*/ jbst) {
 		}
 	}
 
+	/*void*/ function ac(/*Array*/ el, /*array|object|string*/ c) {
+		if (c instanceof Array && c.length && c[0] === "") {
+			// result was multiple JsonML sub-trees (as documentFragment)
+			c.shift();// remove fragment ident
+
+			// directly append children
+			while (c.length) {
+				ac(el, c.shift());
+			}
+		} else if ("object" === typeof c) {
+			// result was a JsonML node (attributes or children)
+			el.push(c);
+		} else if ("undefined" !== typeof c && c !== null) {
+			// must convert to string or JsonML will discard
+			c = String(c);
+
+			// skip processing empty string literals
+			if (c && el.length > 1 && "string" === typeof el[el.length-1]) {
+				// combine strings
+				el[el.length-1] += c;
+			} else if (c || !el.length) {
+				// append
+				el.push(c);
+			}
+		}
+	}
+
 	// recursively applies dataBind to all nodes of the template graph
 	// NOTE: it is very important to replace each node with a copy,
 	// otherwise it destroys the original template.
@@ -108,17 +135,7 @@ JsonML.BST.init = function(/*JBST*/ jbst) {
 				for (var i=0; i<t.length; i++) {
 					// result
 					var r = db(t[i], d, n, l, j);
-					if (r instanceof Array && r.length && r[0] === "") {
-						// result was multiple JsonML trees (documentFragment)
-						r.shift();// remove fragment ident
-						o = o.concat(r); // directly append children
-					} else if ("object" === typeof r) {
-						// result was a JsonML node (attributes or children)
-						o.push(r);
-					} else if ("undefined" !== typeof r && r !== null) {
-						// must convert to string or JsonML will discard
-						o.push(String(r));
-					}
+					ac(o, r);
 				}
 
 				// if o has attributes, check for JBST commands
@@ -126,8 +143,8 @@ JsonML.BST.init = function(/*JBST*/ jbst) {
 					// visibility JBST command
 					var c = o[1][jV];
 					if ("undefined" !== typeof c) {
-						// must match exactly string "false" or boolean false
-						if (String(c) === "false") {
+						// cull any false
+						if (!c) {
 							// suppress rendering of entire subtree
 							return "";
 						}
@@ -208,6 +225,8 @@ JsonML.BST.init = function(/*JBST*/ jbst) {
 		if (JsonML.BST.filter) {
 			return JsonML.BST.filter(el);
 		}
+
+		return el;
 	}
 
 	// the publicly exposed instance method
@@ -220,7 +239,7 @@ JsonML.BST.init = function(/*JBST*/ jbst) {
 			count = data.length;
 			for (var i=0; i<count; i++) {
 				// apply template to each item in array
-				o.push(db(jbst, data[i], i, count, inner));
+				ac(o, db(jbst, data[i], i, count, inner));
 			}
 			return o;
 		} else {
