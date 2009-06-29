@@ -1,4 +1,4 @@
-/*global JSON, JsonML */
+/*global window, JSON, JsonML */
 /*
 	JsonML2.js
 	JsonML support
