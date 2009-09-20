@@ -1,4 +1,4 @@
-/*global window, JSON, JsonML */
+/*global JSON */
 /*
 	JsonML2.js
 	JsonML support
@@ -53,8 +53,9 @@
 
 */
 
-if ("undefined" === typeof window.JsonML) {
-	window.JsonML = {};
+var JsonML;
+if ("undefined" === typeof JsonML) {
+	JsonML = {};
 }
 
 (function() {

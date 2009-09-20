@@ -1,10 +1,9 @@
-﻿/*global window, JsonML */
-/*
+﻿/*
 	JsonML_BST.js
 	JsonML + Browser-Side Templating (JBST) support
 
 	Created: 2008-07-28-2337
-	Modified: 2009-06-28-2243
+	Modified: 2009-09-20-1223
 
 	Copyright (c)2006-2009 Stephen M. McKamey
 	Distributed under an open-source license: http://jsonml.org/license
@@ -27,8 +26,9 @@
 */
 
 /* namespace JsonML */
-if ("undefined" === typeof window.JsonML) {
-	window.JsonML = {};
+var JsonML;
+if ("undefined" === typeof JsonML) {
+	JsonML = {};
 }
 
 /* wrapper */
@@ -134,7 +134,7 @@ JsonML.BST.init = function(/*JBST*/ jbst) {
 				if (o instanceof JsonML.BST.init) {
 					// allow returned JBSTs to recursively bind
 					// useful for creating "switcher" template methods
-					return db(o, d, n, l, j);
+					return o.dataBind(d, n, l, j);
 				}
 				return o;
 			}
@@ -225,7 +225,7 @@ JsonML.BST.init = function(/*JBST*/ jbst) {
 		fn = rm(el, jL);
 		if ("function" === typeof fn) {
 			// queue up to execute after insertion into parentNode
-			window.setTimeout(function() {
+			setTimeout(function() {
 				// execute in context of element
 				fn.call(el);
 				fn = el = null;
