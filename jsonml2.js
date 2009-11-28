@@ -1,10 +1,10 @@
 /*global JSON */
 /*
 	JsonML2.js
-	JsonML support
+	JsonML builder
 
 	Created: 2006-11-09-0116
-	Modified: 2009-05-20-0719
+	Modified: 2009-11-08-1728
 
 	Copyright (c)2006-2009 Stephen M. McKamey
 	Distributed under an open-source license: http://jsonml.org/license

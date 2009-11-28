@@ -1,6 +1,6 @@
 ﻿/*
 	JsonML_BST.js
-	JsonML + Browser-Side Templating (JBST) support
+	JsonML + Browser-Side Templating (JBST)
 
 	Created: 2008-07-28-2337
 	Modified: 2009-09-20-1223

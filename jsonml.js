@@ -1,8 +1,9 @@
 /*
 	JsonML.js
+	JsonML builder
 
 	Created: 2006-11-09-0116
-	Modified: 2009-05-20-0719
+	Modified: 2009-11-08-1728
 
 	Released under an open-source license:
 	http://jsonml.org/License.htm
