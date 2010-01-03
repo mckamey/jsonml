@@ -3,7 +3,7 @@
 	JsonML + Browser-Side Templating (JBST)
 
 	Created: 2008-07-28-2337
-	Modified: 2009-09-20-1223
+	Modified: 2009-12-26-1120
 
 	Copyright (c)2006-2009 Stephen M. McKamey
 	Distributed under an open-source license: http://jsonml.org/license
@@ -149,7 +149,7 @@ JsonML.BST.init = function(/*JBST*/ jbst) {
 				}
 
 				// if o has attributes, check for JBST commands
-				if (o.length > 1 && ("object" === typeof o[1]) && !(o[1] instanceof Array)) {
+				if (o.length > 1 && o[1] && ("object" === typeof o[1]) && !(o[1] instanceof Array)) {
 					// visibility JBST command
 					var c = o[1][jV];
 					if ("undefined" !== typeof c) {
