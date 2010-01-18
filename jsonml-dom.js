@@ -1,5 +1,4 @@
-﻿/*global JsonML */
-/*
+﻿/*
 	JsonML_DOM.js
 	DOM to JsonML utility
 
@@ -10,24 +9,26 @@
 	Distributed under an open-source license: http://jsonml.org/license
 */
 
-if ("undefined" === typeof window.JsonML) {
-	window.JsonML = {};
+var JsonML;
+if ("undefined" === typeof JsonML) {
+	JsonML = {};
 }
 
-/*JsonML*/ JsonML.parseDOM = function(/*DOM*/ elem) {
-	if (!elem) {
+/*JsonML*/ JsonML.parseDOM = function(/*DOM*/ elem, /*function*/ filter) {
+	if (!elem || !elem.nodeType) {
 		return null;
 	}
 
-	var i;
+	var i, jml, att, hasAttrib = false;
 	switch (elem.nodeType) {
-		case 1: // element
+		case 1:  // element
+		case 9:  // document
 		case 11: // documentFragment
-			var jml = [elem.tagName||""];
+			jml = [elem.tagName||""];
+			att = {};
+
 			var a = elem.attributes;
-			var att = {};
-			var hasAttrib = false;
-			for (i=0; i<a.length; i++) {
+			for (i=0; a && i<a.length; i++) {
 				if (a[i].specified) {
 					if (a[i].name === "style") {
 						att.style = elem.style.cssText ? elem.style.cssText : a[i].value;
@@ -43,24 +44,47 @@ if ("undefined" === typeof window.JsonML) {
 			if (elem.hasChildNodes()) {
 				for (i=0; i<elem.childNodes.length; i++) {
 					var c = elem.childNodes[i];
-					c = JsonML.parseDOM(c);
+					c = JsonML.parseDOM(c, filter);
 					if (c) {
 						jml.push(c);
 					}
 				}
 			}
-			return jml;
+			return ("function" === typeof filter) ? filter(jml) : jml;
 		case 3: // text node
 			return elem.nodeValue;
+		case 10: // doctype
+			jml = ["!DOCTYPE"];
+			att = {};
+			if (elem.name) {
+				att.name = String(elem.name);
+				hasAttrib = true;
+			}
+			if (elem.publicId) {
+				att.publicId = String(elem.publicId);
+				hasAttrib = true;
+			}
+			if (elem.systemId) {
+				att.systemId = String(elem.systemId);
+				hasAttrib = true;
+			}
+			if (elem.baseURI) {
+				att.baseURI = String(elem.baseURI);
+				hasAttrib = true;
+			}
+			if (hasAttrib) {
+				jml.push(att);
+			}
+			return ("function" === typeof filter) ? filter(jml) : jml;
 		default: // comments, etc.
 			return null;
 	}
 };
 
-/*JsonML*/ JsonML.parseHTML = function(/*string*/ html) {
+/*JsonML*/ JsonML.parseHTML = function(/*string*/ html, /*function*/ filter) {
 	var elem = document.createElement("div");
 	elem.innerHTML = html;
-	var jml = JsonML.parseDOM(elem);
+	var jml = JsonML.parseDOM(elem, filter);
 	if (jml.length === 2) {
 		return jml[1];
 	}
