@@ -19,15 +19,17 @@ if ("undefined" === typeof JsonML) {
 		return null;
 	}
 
-	var i, jml, att, hasAttrib = false;
+	var i, jml;
 	switch (elem.nodeType) {
 		case 1:  // element
 		case 9:  // document
 		case 11: // documentFragment
 			jml = [elem.tagName||""];
-			att = {};
 
-			var a = elem.attributes;
+			var a = elem.attributes,
+				att = {},
+				hasAttrib = false;
+
 			for (i=0; a && i<a.length; i++) {
 				if (a[i].specified) {
 					if (a[i].name === "style") {
@@ -52,31 +54,34 @@ if ("undefined" === typeof JsonML) {
 			}
 			return ("function" === typeof filter) ? filter(jml) : jml;
 		case 3: // text node
+		case 4: // CDATA node
 			return elem.nodeValue;
 		case 10: // doctype
-			jml = ["!DOCTYPE"];
-			att = {};
-			if (elem.name) {
-				att.name = String(elem.name);
-				hasAttrib = true;
-			}
+			jml = ["!"];
+			
+			var type = ["DOCTYPE", (elem.name || "html").toLowerCase()];
+			
 			if (elem.publicId) {
-				att.publicId = String(elem.publicId);
-				hasAttrib = true;
+				type.push("PUBLIC", '"' + elem.publicId + '"');
 			}
+
 			if (elem.systemId) {
-				att.systemId = String(elem.systemId);
-				hasAttrib = true;
+				type.push('"' + elem.systemId + '"');
 			}
-			if (elem.baseURI) {
-				att.baseURI = String(elem.baseURI);
-				hasAttrib = true;
-			}
-			if (hasAttrib) {
-				jml.push(att);
-			}
+
+			jml.push(type.join(" "));
+
 			return ("function" === typeof filter) ? filter(jml) : jml;
-		default: // comments, etc.
+		case 8: // comment node
+			if ((elem.nodeValue||"").indexOf("DOCTYPE") !== 0) {
+				return null;
+			}
+
+			jml = ["!",
+					elem.nodeValue];
+
+			return ("function" === typeof filter) ? filter(jml) : jml;
+		default: // etc.
 			return null;
 	}
 };
