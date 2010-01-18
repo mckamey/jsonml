@@ -16,6 +16,8 @@ if ("undefined" === typeof JsonML) {
 
 /*JsonML*/ JsonML.parseDOM = function(/*DOM*/ elem, /*function*/ filter) {
 	if (!elem || !elem.nodeType) {
+		// free references
+		elem = null;
 		return null;
 	}
 
@@ -43,24 +45,61 @@ if ("undefined" === typeof JsonML) {
 			if (hasAttrib) {
 				jml.push(att);
 			}
-			if (elem.hasChildNodes()) {
-				for (i=0; i<elem.childNodes.length; i++) {
-					var c = elem.childNodes[i];
-					c = JsonML.parseDOM(c, filter);
-					if (c) {
-						jml.push(c);
+
+			var c;
+			switch (jml[0].toLowerCase()) {
+				case "frame":
+				case "iframe":
+					try {
+						if ("undefined" !== typeof elem.contentDocument) {
+							// W3C
+							c = elem.contentDocument;
+						} else if ("undefined" !== typeof elem.contentWindow) {
+							// Microsoft
+							c = elem.contentWindow.document;
+						} else if ("undefined" !== typeof elem.document) {
+							// deprecated
+							c = elem.document;
+						}
+
+						c = JsonML.parseDOM(c, filter);
+						if (c) {
+							jml.push(c);
+						}
+					} catch (ex) {}
+					break;
+				default:
+					if (elem.hasChildNodes()) {
+						for (i=0; i<elem.childNodes.length; i++) {
+							c = elem.childNodes[i];
+							c = JsonML.parseDOM(c, filter);
+							if (c) {
+								jml.push(c);
+							}
+						}
 					}
-				}
+					break;
 			}
-			return ("function" === typeof filter) ? filter(jml) : jml;
+			
+			// filter result
+			if ("function" === typeof filter) {
+				jml = filter(jml, elem);
+			}
+
+			// free references
+			elem = null;
+			return jml;
 		case 3: // text node
 		case 4: // CDATA node
-			return elem.nodeValue;
+			var str = String(elem.nodeValue);
+			// free references
+			elem = null;
+			return str;
 		case 10: // doctype
 			jml = ["!"];
-			
+
 			var type = ["DOCTYPE", (elem.name || "html").toLowerCase()];
-			
+
 			if (elem.publicId) {
 				type.push("PUBLIC", '"' + elem.publicId + '"');
 			}
@@ -71,17 +110,35 @@ if ("undefined" === typeof JsonML) {
 
 			jml.push(type.join(" "));
 
-			return ("function" === typeof filter) ? filter(jml) : jml;
+			// filter result
+			if ("function" === typeof filter) {
+				jml = filter(jml, elem);
+			}
+
+			// free references
+			elem = null;
+			return jml;
 		case 8: // comment node
 			if ((elem.nodeValue||"").indexOf("DOCTYPE") !== 0) {
+				// free references
+				elem = null;
 				return null;
 			}
 
 			jml = ["!",
 					elem.nodeValue];
 
-			return ("function" === typeof filter) ? filter(jml) : jml;
+			// filter result
+			if ("function" === typeof filter) {
+				jml = filter(jml, elem);
+			}
+
+			// free references
+			elem = null;
+			return jml;
 		default: // etc.
+			// free references
+			elem = null;
 			return null;
 	}
 };
@@ -90,6 +147,10 @@ if ("undefined" === typeof JsonML) {
 	var elem = document.createElement("div");
 	elem.innerHTML = html;
 	var jml = JsonML.parseDOM(elem, filter);
+
+	// free references
+	elem = null;
+
 	if (jml.length === 2) {
 		return jml[1];
 	}
