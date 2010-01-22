@@ -35,7 +35,7 @@ if ("undefined" === typeof JsonML) {
 			for (i=0; a && i<a.length; i++) {
 				if (a[i].specified) {
 					if (a[i].name === "style") {
-						att.style = elem.style.cssText ? elem.style.cssText : a[i].value;
+						att.style = elem.style.cssText || a[i].value;
 					} else if ("string" === typeof a[i].value) {
 						att[a[i].name] = a[i].value;
 					}
@@ -67,6 +67,20 @@ if ("undefined" === typeof JsonML) {
 							jml.push(c);
 						}
 					} catch (ex) {}
+					break;
+				case "style":
+					c = elem.styleSheet && elem.styleSheet.cssText;
+					if (c) {
+						jml.push(c);
+					} else if (elem.hasChildNodes()) {
+						for (i=0; i<elem.childNodes.length; i++) {
+							c = elem.childNodes[i];
+							c = JsonML.parseDOM(c, filter);
+							if (c) {
+								jml.push(c);
+							}
+						}
+					}
 					break;
 				default:
 					if (elem.hasChildNodes()) {
