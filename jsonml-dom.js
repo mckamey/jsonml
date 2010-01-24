@@ -70,13 +70,17 @@ if ("undefined" === typeof JsonML) {
 					break;
 				case "style":
 					c = elem.styleSheet && elem.styleSheet.cssText;
-					if (c) {
+					if (c && "string" === typeof c) {
+						// unwrap comment blocks
+						c = c.replace("<!--", "").replace("-->", "");
 						jml.push(c);
 					} else if (elem.hasChildNodes()) {
 						for (i=0; i<elem.childNodes.length; i++) {
 							c = elem.childNodes[i];
 							c = JsonML.parseDOM(c, filter);
-							if (c) {
+							if (c && "string" === typeof c) {
+								// unwrap comment blocks
+								c = c.replace("<!--", "").replace("-->", "");
 								jml.push(c);
 							}
 						}
