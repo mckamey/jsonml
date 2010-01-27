@@ -17,8 +17,22 @@ if ("undefined" === typeof JsonML) {
 /*JsonML*/ JsonML.parseDOM = function(/*DOM*/ elem, /*function*/ filter) {
 	if (!elem || !elem.nodeType) {
 		// free references
-		elem = null;
-		return null;
+		return (elem = null);
+	}
+
+	// add children
+	function ac(/*DOM*/ elem, /*function*/ filter, /*JsonML*/ jml) {
+		if (elem.hasChildNodes()) {
+			for (var i=0; i<elem.childNodes.length; i++) {
+				var c = elem.childNodes[i];
+				c = JsonML.parseDOM(c, filter);
+				if (c) {
+					jml.push(c);
+				}
+			}
+			return true;
+		}
+		return false;
 	}
 
 	var i, jml;
@@ -86,16 +100,30 @@ if ("undefined" === typeof JsonML) {
 						}
 					}
 					break;
-				default:
-					if (elem.hasChildNodes()) {
-						for (i=0; i<elem.childNodes.length; i++) {
-							c = elem.childNodes[i];
-							c = JsonML.parseDOM(c, filter);
-							if (c) {
-								jml.push(c);
-							}
+				case "input":
+					ac(elem, filter, jml);
+					c = (elem.type !== "password") && elem.value;
+					if (c) {
+						if (!hasAttrib) {
+							// need to add an attribute object
+							jml.shift();
+							att = {};
+							jml.unshift(att);
+							jml.unshift(elem.tagName||"");
+						}
+						att.value = c;
+					}
+					break;
+				case "textarea":
+					if (!ac(elem, filter, jml)) {
+						c = elem.value || elem.innerHTML;
+						if (c && "string" === typeof c) {
+							jml.push(c);
 						}
 					}
+					break;
+				default:
+					ac(elem, filter, jml);
 					break;
 			}
 			
@@ -156,8 +184,7 @@ if ("undefined" === typeof JsonML) {
 			return jml;
 		default: // etc.
 			// free references
-			elem = null;
-			return null;
+			return (elem = null);
 	}
 };
 
