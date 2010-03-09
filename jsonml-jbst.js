@@ -267,6 +267,18 @@ JsonML.BST.init = function(/*JBST*/ jbst) {
 		// hydrate the resulting JsonML, executing callbacks, and user-filter
 		return JsonML.parse(jml, jf);
 	};
+
+	/*void*/ self.replace = function(/*DOM*/ elem, /*object*/ data, /*int*/ index, /*int*/ count, /*JBST*/ inner) {
+		if ("string" === typeof elem) {
+			elem = document.getElementById(elem);
+		}
+		if (elem && elem.parentNode) {
+			var jml = self.bind(data, index, count, inner);
+			if (jml) {
+				elem.parentNode.replaceChild(jml, elem);
+			}
+		}
+	};
 };
 
 /* override this to perform default filtering of the resulting DOM tree */
