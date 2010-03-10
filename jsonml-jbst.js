@@ -1,4 +1,4 @@
-﻿/*
+/*
 	JsonML_BST.js
 	JsonML + Browser-Side Templating (JBST)
 

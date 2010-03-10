@@ -1,4 +1,4 @@
-﻿/*
+/*
 	JsonML_DOM.js
 	DOM to JsonML utility
 
