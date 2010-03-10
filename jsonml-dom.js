@@ -20,14 +20,13 @@ if ("undefined" === typeof JsonML) {
 		return (elem = null);
 	}
 
-	// add children
-	function ac(/*DOM*/ elem, /*function*/ filter, /*JsonML*/ jml) {
+	function addChildren(/*DOM*/ elem, /*function*/ filter, /*JsonML*/ jml) {
 		if (elem.hasChildNodes()) {
 			for (var i=0; i<elem.childNodes.length; i++) {
-				var c = elem.childNodes[i];
-				c = JsonML.parseDOM(c, filter);
-				if (c) {
-					jml.push(c);
+				var child = elem.childNodes[i];
+				child = JsonML.parseDOM(child, filter);
+				if (child) {
+					jml.push(child);
 				}
 			}
 			return true;
@@ -42,88 +41,88 @@ if ("undefined" === typeof JsonML) {
 		case 11: // documentFragment
 			jml = [elem.tagName||""];
 
-			var a = elem.attributes,
-				att = {},
+			var attr = elem.attributes,
+				props = {},
 				hasAttrib = false;
 
-			for (i=0; a && i<a.length; i++) {
-				if (a[i].specified) {
-					if (a[i].name === "style") {
-						att.style = elem.style.cssText || a[i].value;
-					} else if ("string" === typeof a[i].value) {
-						att[a[i].name] = a[i].value;
+			for (i=0; attr && i<attr.length; i++) {
+				if (attr[i].specified) {
+					if (attr[i].name === "style") {
+						props.style = elem.style.cssText || attr[i].value;
+					} else if ("string" === typeof attr[i].value) {
+						props[attr[i].name] = attr[i].value;
 					}
 					hasAttrib = true;
 				}
 			}
 			if (hasAttrib) {
-				jml.push(att);
+				jml.push(props);
 			}
 
-			var c;
+			var child;
 			switch (jml[0].toLowerCase()) {
 				case "frame":
 				case "iframe":
 					try {
 						if ("undefined" !== typeof elem.contentDocument) {
 							// W3C
-							c = elem.contentDocument;
+							child = elem.contentDocument;
 						} else if ("undefined" !== typeof elem.contentWindow) {
 							// Microsoft
-							c = elem.contentWindow.document;
+							child = elem.contentWindow.document;
 						} else if ("undefined" !== typeof elem.document) {
 							// deprecated
-							c = elem.document;
+							child = elem.document;
 						}
 
-						c = JsonML.parseDOM(c, filter);
-						if (c) {
-							jml.push(c);
+						child = JsonML.parseDOM(child, filter);
+						if (child) {
+							jml.push(child);
 						}
 					} catch (ex) {}
 					break;
 				case "style":
-					c = elem.styleSheet && elem.styleSheet.cssText;
-					if (c && "string" === typeof c) {
+					child = elem.styleSheet && elem.styleSheet.cssText;
+					if (child && "string" === typeof child) {
 						// unwrap comment blocks
-						c = c.replace("<!--", "").replace("-->", "");
-						jml.push(c);
+						child = child.replace("<!--", "").replace("-->", "");
+						jml.push(child);
 					} else if (elem.hasChildNodes()) {
 						for (i=0; i<elem.childNodes.length; i++) {
-							c = elem.childNodes[i];
-							c = JsonML.parseDOM(c, filter);
-							if (c && "string" === typeof c) {
+							child = elem.childNodes[i];
+							child = JsonML.parseDOM(child, filter);
+							if (child && "string" === typeof child) {
 								// unwrap comment blocks
-								c = c.replace("<!--", "").replace("-->", "");
-								jml.push(c);
+								child = child.replace("<!--", "").replace("-->", "");
+								jml.push(child);
 							}
 						}
 					}
 					break;
 				case "input":
-					ac(elem, filter, jml);
-					c = (elem.type !== "password") && elem.value;
-					if (c) {
+					addChildren(elem, filter, jml);
+					child = (elem.type !== "password") && elem.value;
+					if (child) {
 						if (!hasAttrib) {
 							// need to add an attribute object
 							jml.shift();
-							att = {};
-							jml.unshift(att);
+							props = {};
+							jml.unshift(props);
 							jml.unshift(elem.tagName||"");
 						}
-						att.value = c;
+						props.value = child;
 					}
 					break;
 				case "textarea":
-					if (!ac(elem, filter, jml)) {
-						c = elem.value || elem.innerHTML;
-						if (c && "string" === typeof c) {
-							jml.push(c);
+					if (!addChildren(elem, filter, jml)) {
+						child = elem.value || elem.innerHTML;
+						if (child && "string" === typeof child) {
+							jml.push(child);
 						}
 					}
 					break;
 				default:
-					ac(elem, filter, jml);
+					addChildren(elem, filter, jml);
 					break;
 			}
 			
