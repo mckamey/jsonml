@@ -3,9 +3,9 @@
 	JsonML + Browser-Side Templating (JBST)
 
 	Created: 2008-07-28-2337
-	Modified: 2009-12-26-1120
+	Modified: 2010-03-09-2304
 
-	Copyright (c)2006-2009 Stephen M. McKamey
+	Copyright (c)2006-2010 Stephen M. McKamey
 	Distributed under an open-source license: http://jsonml.org/license
 
     This file creates a JsonML.BST type containing these methods:
@@ -19,9 +19,16 @@
 		Implement filter to intercept and perform automatic filtering of the resulting DOM tree while binding:
 		JsonML.BST.filter = function (element) {
 			if (condition) {
-				return document.createElement("foo");
+				// this will remove from resulting DOM tree
+				return null;
 			}
 			return element;
+		};
+
+		Implement onerror to handle any runtime errors while binding:
+		JsonML.BST.onerror = function (ex, jbst, data, index, count, inner) {
+			// display inline error message
+			return "["+ex+"]";
 		};
 */
 
@@ -42,201 +49,214 @@ JsonML.BST = function(/*JBST*/ jbst) {
 /* ctor */
 JsonML.BST.init = function(/*JBST*/ jbst) {
 	var self = this,
-		jV = "jbst:visible",
-		jI = "jbst:oninit",
-		jL = "jbst:onload";
+		SHOW = "jbst:visible",
+		INIT = "jbst:oninit",
+		LOAD = "jbst:onload";
 
 	// ensures attribute key contains method or is removed
-	// a: attribute object
-	// k: property key
-	/*void*/ function em(/*object*/ a, /*string*/ k) {
-		// callback method
-		var c = a[k];
-		if ("undefined" !== typeof c) {
+	// attr: attribute object
+	// key: property key
+	/*void*/ function ensureMethod(/*object*/ attr, /*string*/ key) {
+		var method = attr[key];
+		if ("undefined" !== typeof method) {
 			// ensure is method
-			if ("function" !== typeof c) {
+			if ("function" !== typeof method) {
 				try {
 					/*jslint evil:true */
-					c = new Function(String(c));
+					method = new Function(String(method));
 					/*jslint evil:false */
 				} catch (ex) {
-					c = null;
+					method = null;
 				}
 			}
-			if (c) {
+			if (method) {
 				// IE doesn't like colon in property names
-				a[k.replace(':', '$')] = c;
+				attr[key.split(':').join('$')] = method;
 			}
-			delete a[k];
+			delete attr[key];
 		}
 	}
 
 	// appends a child tree to a parent
-	// el: parent element
-	// c: child tree
-	/*void*/ function ac(/*Array*/ el, /*array|object|string*/ c) {
-		if (c instanceof Array && c.length && c[0] === "") {
+	// elem: parent element
+	// child: child tree
+	/*void*/ function appendChild(/*Array*/ elem, /*array|object|string*/ child) {
+		if (child instanceof Array && child.length && child[0] === "") {
 			// result was multiple JsonML sub-trees (as documentFragment)
-			c.shift();// remove fragment ident
+			child.shift();// remove fragment ident
 
 			// directly append children
-			while (c.length) {
-				ac(el, c.shift());
+			while (child.length) {
+				appendChild(elem, child.shift());
 			}
-		} else if ("object" === typeof c) {
+		} else if ("object" === typeof child) {
 			// result was a JsonML node (attributes or children)
-			el.push(c);
-		} else if ("undefined" !== typeof c && c !== null) {
+			elem.push(child);
+		} else if ("undefined" !== typeof child && child !== null) {
 			// must convert to string or JsonML will discard
-			c = String(c);
+			child = String(child);
 
 			// skip processing empty string literals
-			if (c && el.length > 1 && "string" === typeof el[el.length-1]) {
+			if (child && elem.length > 1 && "string" === typeof elem[elem.length-1]) {
 				// combine strings
-				el[el.length-1] += c;
-			} else if (c || !el.length) {
+				elem[elem.length-1] += child;
+			} else if (child || !elem.length) {
 				// append
-				el.push(c);
+				elem.push(child);
 			}
 		}
+	}
+
+	// default onerror handler
+	// ex: exception
+	/*JsonML*/ function onerror(/*Error*/ ex, /*JBST*/ node, /*object*/ data, /*int*/ index, /*int*/ count, /*JBST*/ inner) {
+		return "["+ex+"]";
 	}
 
 	// recursively applies dataBind to all nodes of the template graph
 	// NOTE: it is very important to replace each node with a copy,
 	// otherwise it destroys the original template.
-	// t: current template node being data bound
-	// d: current data item being bound
-	// n: index of current data item
-	// l: count of current set of data items
-	// j: nested JBST template
+	// node: current template node being data bound
+	// data: current data item being bound
+	// index: index of current data item
+	// count: count of current set of data items
+	// inner: nested JBST template
 	// returns: JsonML nodes
-	/*object*/ function db(/*JBST*/ t, /*object*/ d, /*int*/ n, /*int*/ l, /*JBST*/ j) {
-		// process JBST node
-		if (t) {
-			// output
-			var o;
+	/*object*/ function dataBind(/*JBST*/ node, /*object*/ data, /*int*/ index, /*int*/ count, /*JBST*/ inner) {
+		try {
+			// process JBST node
+			if (node) {
+				// output
+				var output;
 
-			if ("function" === typeof t) {
-				try {
-					// setup context for code block
-					self.data = d;
-					self.index = isFinite(n) ? Number(n) : NaN;
-					self.count = isFinite(l) ? Number(l) : NaN;
-					// execute t in the context of self as "this"
-					o = t.call(self, j);
-				} finally {
-					// cleanup contextual members
-					delete self.count;
-					delete self.index;
-					delete self.data;
-				}
-
-				if (o instanceof JsonML.BST.init) {
-					// allow returned JBSTs to recursively bind
-					// useful for creating "switcher" template methods
-					return o.dataBind(d, n, l, j);
-				}
-				return o;
-			}
-
-			if (t instanceof Array) {
-				// output array
-				o = [];
-				for (var i=0; i<t.length; i++) {
-					// result
-					var r = db(t[i], d, n, l, j);
-					ac(o, r);
-				}
-
-				// if o has attributes, check for JBST commands
-				if (o.length > 1 && o[1] && ("object" === typeof o[1]) && !(o[1] instanceof Array)) {
-					// visibility JBST command
-					var c = o[1][jV];
-					if ("undefined" !== typeof c) {
-						// cull any false
-						if (!c) {
-							// suppress rendering of entire subtree
-							return "";
-						}
-						// remove attribute
-						delete o[1][jV];
+				if ("function" === typeof node) {
+					try {
+						// setup context for code block
+						self.data = data;
+						self.index = isFinite(index) ? Number(index) : NaN;
+						self.count = isFinite(count) ? Number(count) : NaN;
+						// execute node in the context of self as "this"
+						output = node.call(self, inner);
+					} finally {
+						// cleanup contextual members
+						delete self.count;
+						delete self.index;
+						delete self.data;
 					}
 
-					// oninit JBST callback
-					em(o[1], jI);
-
-					// onload JBST callback
-					em(o[1], jL);
+					if (output instanceof JsonML.BST.init) {
+						// allow returned JBSTs to recursively bind
+						// useful for creating "switcher" template methods
+						return output.dataBind(data, index, count, inner);
+					}
+					return output;
 				}
-				return o;
-			}
 
-			if ("object" === typeof t) {
-				// output object
-				o = {};
-				// for each property in template node
-				for (var p in t) {
-					if (t.hasOwnProperty(p)) {
-						// evaluate property's value
-						var v = db(t[p], d, n, l, j);
-						if ("undefined" !== typeof v && v !== null) {
-							o[p] = v;
+				if (node instanceof Array) {
+					// output array
+					output = [];
+					for (var i=0; i<node.length; i++) {
+						// result
+						var result = dataBind(node[i], data, index, count, inner);
+						appendChild(output, result);
+					}
+
+					// if output has attributes, check for JBST commands
+					if (output.length > 1 && output[1] && ("object" === typeof output[1]) && !(output[1] instanceof Array)) {
+						// visibility JBST command
+						var child = output[1][SHOW];
+						if ("undefined" !== typeof child) {
+							// cull any false-y values
+							if (!child) {
+								// suppress rendering of entire subtree
+								return "";
+							}
+							// remove attribute
+							delete output[1][SHOW];
+						}
+
+						// jbst:oninit
+						ensureMethod(output[1], INIT);
+
+						// jbst:onload
+						ensureMethod(output[1], LOAD);
+					}
+					return output;
+				}
+
+				if ("object" === typeof node) {
+					output = {};
+					// process each property in template node
+					for (var property in node) {
+						if (node.hasOwnProperty(property)) {
+							// evaluate property's value
+							var value = dataBind(node[property], data, index, count, inner);
+							if ("undefined" !== typeof value && value !== null) {
+								output[property] = value;
+							}
 						}
 					}
+					return output;
 				}
-				return o;
+			}
+
+			// rest are value types, so return node directly
+			return node;
+		} catch (ex) {
+			try {
+				// handle error with complete context
+				return ("function" === typeof JsonML.BST.onerror ? JsonML.BST.onerror : onerror)(ex, node, data, index, count, inner);
+			} catch (ex2) {
+				return null;
 			}
 		}
-
-		// rest are value types, so return node directly
-		return t;
 	}
 
 	// retrieve and remove method
-	/*function*/ function rm(/*DOM*/ el, /*string*/ k) {
+	/*function*/ function popMethod(/*DOM*/ elem, /*string*/ key) {
 		// IE doesn't like colon in property names
-		k = k.replace(':', '$');
+		key = key.split(':').join('$');
 
 		var undef, // intentionally left undefined
-			fn = el[k];
+			method = elem[key];
 
-		if (fn) {
+		if (method) {
 			try {
-				delete el[k];
+				delete elem[key];
 			} catch (ex) {
 				// sometimes IE doesn't like deleting from DOM
-				el[k] = undef;
+				elem[key] = undef;
 			}
 		}
-		return fn;
+		return method;
 	}
 
 	// JsonML Filter
-	/*DOM*/ function jf(/*DOM*/ el) {
+	/*DOM*/ function filter(/*DOM*/ elem) {
 
 		// execute and remove jbst:oninit method
-		var fn = rm(el, jI);
-		if ("function" === typeof fn) {
+		var method = popMethod(elem, INIT);
+		if ("function" === typeof method) {
 			// execute in context of element
-			fn.call(el);
+			method.call(elem);
 		}
 
 		// execute and remove jbst:onload method
-		fn = rm(el, jL);
-		if ("function" === typeof fn) {
+		method = popMethod(elem, LOAD);
+		if ("function" === typeof method) {
 			// queue up to execute after insertion into parentNode
 			setTimeout(function() {
 				// execute in context of element
-				fn.call(el);
-				fn = el = null;
+				method.call(elem);
+				method = elem = null;
 			}, 0);
 		}
 
 		if (JsonML.BST.filter) {
-			return JsonML.BST.filter(el);
+			return JsonML.BST.filter(elem);
 		}
 
-		return el;
+		return elem;
 	}
 
 	// the publicly exposed instance method
@@ -244,17 +264,17 @@ JsonML.BST.init = function(/*JBST*/ jbst) {
 	/*JsonML*/ self.dataBind = function(/*object*/ data, /*int*/ index, /*int*/ count, /*JBST*/ inner) {
 		if (data instanceof Array) {
 			// create a document fragment to hold list
-			var o = [""];
+			var output = [""];
 
 			count = data.length;
 			for (var i=0; i<count; i++) {
 				// apply template to each item in array
-				ac(o, db(jbst, data[i], i, count, inner));
+				appendChild(output, dataBind(jbst, data[i], i, count, inner));
 			}
-			return o;
+			return output;
 		} else {
 			// data is singular so apply template once
-			return db(jbst, data, index, count, inner);
+			return dataBind(jbst, data, index, count, inner);
 		}
 	};
 
@@ -265,13 +285,15 @@ JsonML.BST.init = function(/*JBST*/ jbst) {
 		var jml = self.dataBind(data, index, count, inner);
 
 		// hydrate the resulting JsonML, executing callbacks, and user-filter
-		return JsonML.parse(jml, jf);
+		return JsonML.parse(jml, filter);
 	};
 
+	// replaces a DOM element with element result from binding
 	/*void*/ self.replace = function(/*DOM*/ elem, /*object*/ data, /*int*/ index, /*int*/ count, /*JBST*/ inner) {
 		if ("string" === typeof elem) {
 			elem = document.getElementById(elem);
 		}
+
 		if (elem && elem.parentNode) {
 			var jml = self.bind(data, index, count, inner);
 			if (jml) {
@@ -283,3 +305,6 @@ JsonML.BST.init = function(/*JBST*/ jbst) {
 
 /* override this to perform default filtering of the resulting DOM tree */
 /*DOM function(DOM)*/ JsonML.BST.filter = null;
+
+/* override this to perform custom error handling during binding */
+/*DOM function(DOM)*/ JsonML.BST.onerror = null;
