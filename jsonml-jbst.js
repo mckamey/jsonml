@@ -40,6 +40,15 @@
 				console.log(JSON.stringify(output));
 			}
 		};
+
+		// implement onappend event to perform custom processing of children before being appended
+		JsonML.BST.onappend = function(parent, child) {
+			// access the current context via this.data, this.index, etc.
+			// watch elements as they are added
+			if (window.console) {
+				console.log(JsonML.getTagName(parent)+" > "+JsonML.getTagName(child));
+			}
+		};
 */
 
 /* namespace JsonML */

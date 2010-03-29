@@ -465,7 +465,7 @@ if ("undefined" === typeof JsonML) {
 			}
 		} else if (child && "object" === typeof child) {
 			if (child instanceof Array) {
-				if (!JsonML.isElement(parent) && !JsonML.isElement(child)) {
+				if (!JsonML.isElement(parent) || !JsonML.isElement(child)) {
 					throw new SyntaxError("invalid JsonML");
 				}
 
