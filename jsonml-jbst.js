@@ -3,7 +3,7 @@
 	JsonML + Browser-Side Templating (JBST)
 
 	Created: 2008-07-28-2337
-	Modified: 2010-03-28-1758
+	Modified: 2010-03-28-2253
 
 	Copyright (c)2006-2010 Stephen M. McKamey
 	Distributed under an open-source license: http://jsonml.org/license
@@ -164,7 +164,8 @@ JsonML.BST = (function(){
 			throw new Error("JBST tree is undefined");
 		}
 
-		var self = this;
+		var self = this,
+			appendChild = JsonML.appendChild;
 
 		// recursively applies dataBind to all nodes of the template graph
 		// NOTE: it is very important to replace each node with a copy,
@@ -179,7 +180,6 @@ JsonML.BST = (function(){
 			try {
 				// recursively process each node
 				if (node) {
-					// output
 					var output;
 
 					if ("function" === typeof node) {
@@ -190,19 +190,31 @@ JsonML.BST = (function(){
 							// useful for creating "switcher" template methods
 							return output.dataBind(data, index, count, args);
 						}
+
+						// function result
 						return output;
 					}
 
 					if (node instanceof Array) {
+						var onBound = ("function" === typeof JsonML.BST.onbound) && JsonML.BST.onbound,
+							onAppend = ("function" === typeof JsonML.BST.onappend) && JsonML.BST.onappend,
+							appendCB = onAppend && function(parent, child) {
+								callContext(self, data, index, count, args, onAppend, [parent, child]);
+							};
+
 						// JsonML output
 						output = [];
 						for (var i=0; i<node.length; i++) {
-							var result = dataBind(node[i], data, index, count, args);
-							JsonML.appendChild(output, result);
+							var child = dataBind(node[i], data, index, count, args);
+							appendChild(output, child, appendCB);
+
+							if (!i && !output[0]) {
+								onAppend = appendCB = null;
+							}
 						}
 
-						if ("function" === typeof JsonML.BST.onbound) {
-							callContext(self, data, index, count, args, JsonML.BST.onbound, [output]);
+						if (output[0] && onBound) {
+							callContext(self, data, index, count, args, onBound, [output]);
 						}
 
 						// if output has attributes, check for JBST commands
@@ -226,7 +238,7 @@ JsonML.BST = (function(){
 							ensureMethod(output[1], LOAD);
 						}
 
-						// element
+						// JsonML element
 						return output;
 					}
 
@@ -270,7 +282,7 @@ JsonML.BST = (function(){
 				count = data.length;
 				for (var i=0; i<count; i++) {
 					// apply template to each item in array
-					JsonML.appendChild(output, dataBind(jbst, data[i], i, count, args));
+					appendChild(output, dataBind(jbst, data[i], i, count, args));
 				}
 				// document fragment
 				return output;
@@ -316,6 +328,9 @@ JsonML.BST = (function(){
 
 /* override to perform custom error handling during binding */
 /*function*/ JsonML.BST.onerror = null;
+
+/* override to perform custom processing of each element after adding to parent */
+/*function*/ JsonML.BST.onappend = null;
 
 /* override to perform custom processing of each element after binding */
 /*function*/ JsonML.BST.onbound = null;

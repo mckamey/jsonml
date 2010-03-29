@@ -4,7 +4,7 @@
 	JsonML builder
 
 	Created: 2006-11-09-0116
-	Modified: 2010-03-28-1758
+	Modified: 2010-03-28-2253
 
 	Copyright (c)2006-2010 Stephen M. McKamey
 	Distributed under an open-source license: http://jsonml.org/license
@@ -384,6 +384,10 @@ if ("undefined" === typeof JsonML) {
 		return (jml instanceof Array) && ("string" === typeof jml[0]);
 	};
 
+	/*bool*/ JsonML.isFragment = function(/*JsonML*/ jml) {
+		return (jml instanceof Array) && (jml[0] === "");
+	};
+
 	/*string*/ JsonML.getTagName = function(/*JsonML*/ jml) {
 		return jml[0] || "";
 	};
@@ -451,25 +455,30 @@ if ("undefined" === typeof JsonML) {
 	};
 
 	/*void*/ JsonML.appendChild = function(/*JsonML*/ parent, /*array|object|string*/ child) {
-		if (child instanceof Array && child.length && child[0] === "") {
+		if (child instanceof Array && child[0] === "") {
 			// result was multiple JsonML sub-trees (i.e. documentFragment)
 			child.shift();// remove fragment ident
 
 			// directly append children
 			while (child.length) {
-				JsonML.appendChild(parent, child.shift());
+				JsonML.appendChild(parent, child.shift(), arguments[2]);
 			}
 		} else if (child && "object" === typeof child) {
-			if (!(child instanceof Array)) {
-				// result was JsonML attributes
-				JsonML.addAttributes(parent, child);
-			} else {
-				if (!JsonML.isElement(parent)) {
+			if (child instanceof Array) {
+				if (!JsonML.isElement(parent) && !JsonML.isElement(child)) {
 					throw new SyntaxError("invalid JsonML");
+				}
+
+				if ("function" === typeof arguments[2]) {
+					// onAppend callback for JBST use
+					arguments[2](parent, child);
 				}
 
 				// result was a JsonML node
 				parent.push(child);
+			} else {
+				// result was JsonML attributes
+				JsonML.addAttributes(parent, child);
 			}
 		} else if ("undefined" !== typeof child && child !== null) {
 			if (!(parent instanceof Array)) {
