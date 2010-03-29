@@ -3,7 +3,7 @@
 	JsonML + Browser-Side Templating (JBST)
 
 	Created: 2008-07-28-2337
-	Modified: 2010-03-27-0853
+	Modified: 2010-03-28-1758
 
 	Copyright (c)2006-2010 Stephen M. McKamey
 	Distributed under an open-source license: http://jsonml.org/license
@@ -16,23 +16,25 @@
 		// JBST + JSON => JsonML
 		var jsonml = JsonML.BST(jbst).dataBind(data);
 
-		// Implement filter to intercept and perform custom filtering of resulting DOM elements
-		JsonML.BST.filter = function (element) {
+		// implement filter to intercept and perform custom filtering of resulting DOM elements
+		JsonML.BST.filter = function(elem) {
 			if (condition) {
 				// this will prevent insertion into resulting DOM tree
 				return null;
 			}
-			return element;
+			return elem;
 		};
 
-		// Implement onerror event to handle any runtime errors while binding
-		JsonML.BST.onerror = function(ex, node, data, index, count, options) {
+		// implement onerror event to handle any runtime errors while binding
+		JsonML.BST.onerror = function(ex) {
+			// access the current context via this.data, this.index, etc.
 			// display custom inline error messages
 			return "["+ex+"]";
 		};
 
-		// Implement onbound event to perform custom processing of elements after binding
-		JsonML.BST.onbound = function(node, data, index, count, options) {
+		// implement onbound event to perform custom processing of elements after binding
+		JsonML.BST.onbound = function(node) {
+			// access the current context via this.data, this.index, etc.
 			// watch elements as they are constructed
 			if (window.console) {
 				console.log(JSON.stringify(output));
@@ -79,7 +81,7 @@ JsonML.BST = (function(){
 	}
 
 	// default onerror handler, override JsonML.BST.onerror to change
-	/*JsonML*/ function onError(/*Error*/ ex, /*JsonML*/ node, /*object*/ data, /*int*/ index, /*int*/ count, /*object*/ options) {
+	/*JsonML*/ function onError(/*Error*/ ex) {
 		return "["+ex+"]";
 	}
 
@@ -128,6 +130,34 @@ JsonML.BST = (function(){
 		return elem;
 	}
 
+	/*object*/ function callContext(
+		/*object*/ self,
+		/*object*/ data,
+		/*int*/ index,
+		/*int*/ count,
+		/*object*/ args,
+		/*function*/ method,
+		/*Array*/ methodArgs) {
+
+		try {
+			// setup context for code block
+			self.data = ("undefined" !== typeof data) ? data : null;
+			self.index = isFinite(index) ? Number(index) : NaN;
+			self.count = isFinite(count) ? Number(count) : NaN;
+			self.args = ("undefined" !== typeof args) ? args : null;
+
+			// execute node in the context of self as "this", passing in any parameters
+			return method.apply(self, methodArgs || []);
+
+		} finally {
+			// cleanup contextual members
+			delete self.count;
+			delete self.index;
+			delete self.data;
+			delete self.args;
+		}
+	}
+
 	/* ctor */
 	function JBST(/*JsonML*/ jbst) {
 		if ("undefined" === typeof jbst) {
@@ -143,9 +173,9 @@ JsonML.BST = (function(){
 		// data: current data item being bound
 		// index: index of current data item
 		// count: count of current set of data items
-		// options: options object
+		// args: state object
 		// returns: JsonML nodes
-		/*object*/ function dataBind(/*JsonML*/ node, /*object*/ data, /*int*/ index, /*int*/ count, /*object*/ options) {
+		/*object*/ function dataBind(/*JsonML*/ node, /*object*/ data, /*int*/ index, /*int*/ count, /*object*/ args) {
 			try {
 				// recursively process each node
 				if (node) {
@@ -153,24 +183,12 @@ JsonML.BST = (function(){
 					var output;
 
 					if ("function" === typeof node) {
-						try {
-							// setup context for code block
-							self.data = data;
-							self.index = isFinite(index) ? Number(index) : NaN;
-							self.count = isFinite(count) ? Number(count) : NaN;
-							// execute node in the context of self as "this"
-							output = node.call(self, options);
-						} finally {
-							// cleanup contextual members
-							delete self.count;
-							delete self.index;
-							delete self.data;
-						}
+						output = callContext(self, data, index, count, args, node);
 
 						if (output instanceof JBST) {
 							// allow returned JBSTs to recursively bind
 							// useful for creating "switcher" template methods
-							return output.dataBind(data, index, count, options);
+							return output.dataBind(data, index, count, args);
 						}
 						return output;
 					}
@@ -179,12 +197,12 @@ JsonML.BST = (function(){
 						// JsonML output
 						output = [];
 						for (var i=0; i<node.length; i++) {
-							var result = dataBind(node[i], data, index, count, options);
+							var result = dataBind(node[i], data, index, count, args);
 							JsonML.appendChild(output, result);
 						}
 
 						if ("function" === typeof JsonML.BST.onbound) {
-							JsonML.BST.onbound.call(self, output, data, index, count, options);
+							callContext(self, data, index, count, args, JsonML.BST.onbound, [output]);
 						}
 
 						// if output has attributes, check for JBST commands
@@ -218,7 +236,7 @@ JsonML.BST = (function(){
 						for (var property in node) {
 							if (node.hasOwnProperty(property)) {
 								// evaluate property's value
-								var value = dataBind(node[property], data, index, count, options);
+								var value = dataBind(node[property], data, index, count, args);
 								if ("undefined" !== typeof value && value !== null) {
 									output[property] = value;
 								}
@@ -234,7 +252,8 @@ JsonML.BST = (function(){
 			} catch (ex) {
 				try {
 					// handle error with complete context
-					return ("function" === typeof JsonML.BST.onerror ? JsonML.BST.onerror : onError).call(self, ex, node, data, index, count, options);
+					var err = ("function" === typeof JsonML.BST.onerror) ? JsonML.BST.onerror : onError;
+					return callContext(self, data, index, count, args, err, [ex]);
 				} catch (ex2) {
 					return "["+ex2+"]";
 				}
@@ -243,7 +262,7 @@ JsonML.BST = (function(){
 
 		// the publicly exposed instance method
 		// combines JBST and JSON to produce JsonML
-		/*JsonML*/ self.dataBind = function(/*object*/ data, /*int*/ index, /*int*/ count, /*object*/ options) {
+		/*JsonML*/ self.dataBind = function(/*object*/ data, /*int*/ index, /*int*/ count, /*object*/ args) {
 			if (data instanceof Array) {
 				// create a document fragment to hold list
 				var output = [""];
@@ -251,34 +270,34 @@ JsonML.BST = (function(){
 				count = data.length;
 				for (var i=0; i<count; i++) {
 					// apply template to each item in array
-					JsonML.appendChild(output, dataBind(jbst, data[i], i, count, options));
+					JsonML.appendChild(output, dataBind(jbst, data[i], i, count, args));
 				}
 				// document fragment
 				return output;
 			} else {
 				// data is singular so apply template once
-				return dataBind(jbst, data, index, count, options);
+				return dataBind(jbst, data, index, count, args);
 			}
 		};
 
 		/* JBST + JSON => JsonML => DOM */
-		/*DOM*/ self.bind = function(/*object*/ data, /*int*/ index, /*int*/ count, /*object*/ options) {
+		/*DOM*/ self.bind = function(/*object*/ data, /*int*/ index, /*int*/ count, /*object*/ args) {
 
 			// databind JSON data to a JBST template, resulting in a JsonML representation
-			var jml = self.dataBind(data, index, count, options);
+			var jml = self.dataBind(data, index, count, args);
 
 			// hydrate the resulting JsonML, executing callbacks, and user-filter
 			return JsonML.parse(jml, filter);
 		};
 
 		// replaces a DOM element with element result from binding
-		/*void*/ self.replace = function(/*DOM*/ elem, /*object*/ data, /*int*/ index, /*int*/ count, /*object*/ options) {
+		/*void*/ self.replace = function(/*DOM*/ elem, /*object*/ data, /*int*/ index, /*int*/ count, /*object*/ args) {
 			if ("string" === typeof elem) {
 				elem = document.getElementById(elem);
 			}
 
 			if (elem && elem.parentNode) {
-				var jml = self.bind(data, index, count, options);
+				var jml = self.bind(data, index, count, args);
 				if (jml) {
 					elem.parentNode.replaceChild(jml, elem);
 				}

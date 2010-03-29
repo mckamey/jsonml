@@ -4,7 +4,7 @@
 	JsonML builder
 
 	Created: 2006-11-09-0116
-	Modified: 2010-03-27-0722
+	Modified: 2010-03-28-1758
 
 	Copyright (c)2006-2010 Stephen M. McKamey
 	Distributed under an open-source license: http://jsonml.org/license
@@ -291,8 +291,8 @@ if ("undefined" === typeof JsonML) {
 		return new Unparsed(value);
 	};
 
-	// default onerror handler
-	/*DOM*/ function onerror(/*Error*/ ex, /*JsonML*/ jml, /*function*/ filter) {
+	// default error handler
+	/*DOM*/ function onError(/*Error*/ ex, /*JsonML*/ jml, /*function*/ filter) {
 		return document.createTextNode("["+ex+"]");
 	}
 
@@ -370,9 +370,10 @@ if ("undefined" === typeof JsonML) {
 		} catch (ex) {
 			try {
 				// handle error with complete context
-				return ("function" === typeof JsonML.onerror ? JsonML.onerror : onerror)(ex, jml, filter);
+				var err = ("function" === typeof JsonML.onerror) ? JsonML.onerror : onError;
+				return err(ex, jml, filter);
 			} catch (ex2) {
-				return null;
+				return document.createTextNode("["+ex2+"]");
 			}
 		}
 	};
@@ -399,9 +400,13 @@ if ("undefined" === typeof JsonML) {
 		return JsonML.isAttributes(jml[1]);
 	};
 
-	/*object*/ JsonML.getAttributes = function(/*JsonML*/ jml) {
+	/*object*/ JsonML.getAttributes = function(/*JsonML*/ jml, /*bool*/ addIfMissing) {
 		if (JsonML.hasAttributes(jml)) {
 			return jml[1];
+		}
+
+		if (!addIfMissing) {
+			return undefined;
 		}
 
 		// need to add an attribute object
@@ -442,7 +447,7 @@ if ("undefined" === typeof JsonML) {
 	};
 
 	/*void*/ JsonML.setAttribute = function(/*JsonML*/ jml, /*string*/ key, /*string|number|bool*/ value) {
-		JsonML.getAttributes(jml)[key] = value;
+		JsonML.getAttributes(jml, true)[key] = value;
 	};
 
 	/*void*/ JsonML.appendChild = function(/*JsonML*/ parent, /*array|object|string*/ child) {
