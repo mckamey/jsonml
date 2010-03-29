@@ -476,6 +476,13 @@ if ("undefined" === typeof JsonML) {
 
 				// result was a JsonML node
 				parent.push(child);
+			} else if (child instanceof Unparsed) {
+				if (!JsonML.isElement(parent)) {
+					throw new SyntaxError("invalid JsonML");
+				}
+
+				// result was a JsonML node
+				parent.push(child);
 			} else {
 				// result was JsonML attributes
 				JsonML.addAttributes(parent, child);
