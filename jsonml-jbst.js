@@ -3,7 +3,7 @@
 	JsonML + Browser-Side Templating (JBST)
 
 	Created: 2008-07-28-2337
-	Modified: 2010-03-28-2253
+	Modified: 2010-09-13-1952
 
 	Copyright (c)2006-2010 Stephen M. McKamey
 	Distributed under an open-source license: http://jsonml.org/license
@@ -281,9 +281,7 @@ JsonML.BST = (function(){
 			}
 		}
 
-		// the publicly exposed instance method
-		// combines JBST and JSON to produce JsonML
-		/*JsonML*/ self.dataBind = function(/*object*/ data, /*int*/ index, /*int*/ count, /*object*/ args) {
+		/*JsonML*/ function iterate(/*JsonML*/ node, /*object*/ data, /*int*/ index, /*int*/ count, /*object*/ args) {
 			if (data instanceof Array) {
 				// create a document fragment to hold list
 				var output = [""];
@@ -299,19 +297,27 @@ JsonML.BST = (function(){
 				// data is singular so apply template once
 				return dataBind(jbst, data, index, count, args);
 			}
+		}
+
+		// the publicly exposed instance methods
+
+		// combines JBST and JSON to produce JsonML
+		/*JsonML*/ self.dataBind = function(/*object*/ data, /*int*/ index, /*int*/ count, /*object*/ args) {
+			// data is singular so apply template once
+			return iterate(jbst, data, index, count, args);
 		};
 
 		/* JBST + JSON => JsonML => DOM */
 		/*DOM*/ self.bind = function(/*object*/ data, /*int*/ index, /*int*/ count, /*object*/ args) {
 
 			// databind JSON data to a JBST template, resulting in a JsonML representation
-			var jml = self.dataBind(data, index, count, args);
+			var jml = iterate(jbst, data, index, count, args);
 
 			// hydrate the resulting JsonML, executing callbacks, and user-filter
 			return JsonML.parse(jml, filter);
 		};
 
-		// replaces a DOM element with element result from binding
+		// replaces a DOM element with result from binding
 		/*void*/ self.replace = function(/*DOM*/ elem, /*object*/ data, /*int*/ index, /*int*/ count, /*object*/ args) {
 			if ("string" === typeof elem) {
 				elem = document.getElementById(elem);
@@ -322,6 +328,37 @@ JsonML.BST = (function(){
 				if (jml) {
 					elem.parentNode.replaceChild(jml, elem);
 				}
+			}
+		};
+
+		// displace a DOM element with result from binding JsonML+BST node bound within this context
+		/*void*/ self.displace = function(/*DOM*/ elem, /*JsonML*/ node, /*object*/ data, /*int*/ index, /*int*/ count, /*object*/ args) {
+			if ("string" === typeof elem) {
+				elem = document.getElementById(elem);
+			}
+
+			if (elem && elem.parentNode) {
+				// databind JSON data to a JBST template, resulting in a JsonML representation
+				var jml = iterate(node, data, index, count, args);
+
+				// hydrate the resulting JsonML, executing callbacks, and user-filter
+				jml = JsonML.parse(jml, filter);
+				if (jml) {
+					elem.parentNode.replaceChild(jml, elem);
+				}
+			}
+		};
+
+		// patches a DOM element with JsonML+BST node bound within this context
+		/*void*/ self.patch = function(/*DOM*/ elem, /*JsonML*/ node, /*object*/ data, /*int*/ index, /*int*/ count, /*object*/ args) {
+			if ("string" === typeof elem) {
+				elem = document.getElementById(elem);
+			}
+
+			if (elem) {
+				var jml = [""];
+				appendChild(jml, dataBind(node, data, index, count, args));
+				JsonML.patch(elem, jml, filter);
 			}
 		};
 	}

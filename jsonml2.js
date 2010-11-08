@@ -4,7 +4,7 @@
 	JsonML builder
 
 	Created: 2006-11-09-0116
-	Modified: 2010-03-28-2253
+	Modified: 2010-09-13-1952
 
 	Copyright (c)2006-2010 Stephen M. McKamey
 	Distributed under an open-source license: http://jsonml.org/license
@@ -161,7 +161,7 @@ if ("undefined" === typeof JsonML) {
 			if (attr.hasOwnProperty(name)) {
 				// attributeValue
 				var value = attr[name];
-				if (name && value) {
+				if (name && value !== null && "undefined" !== typeof value) {
 					name = ATTRMAP[name.toLowerCase()] || name;
 					if (name === "style") {
 						if ("undefined" !== typeof elem.style.cssText) {
@@ -226,6 +226,9 @@ if ("undefined" === typeof JsonML) {
 				} else if (elem.canHaveChildren !== false) {
 					elem.appendChild(child);
 				}
+			} else if (elem.tagName && elem.tagName.toLowerCase() === "style" && document.createStyleSheet) {
+				// IE requires this interface for styles
+				elem.cssText = child;
 			} else if (elem.canHaveChildren !== false) {
 				elem.appendChild(child);
 			} else if (elem.tagName && elem.tagName.toLowerCase() === "object" &&
@@ -299,6 +302,23 @@ if ("undefined" === typeof JsonML) {
 	/* override this to perform custom error handling during binding */
 	JsonML.onerror = null;
 
+	/*DOM*/ function patch(/*DOM*/ elem, /*JsonML*/ jml, /*function*/ filter) {
+
+		for (var i=1; i<jml.length; i++) {
+			if (jml[i] instanceof Array || "string" === typeof jml[i]) {
+				// append children
+				appendChild(elem, JsonML.parse(jml[i], filter));
+			} else if (jml[i] instanceof Unparsed) {
+				appendChild(elem, hydrate(jml[i].value));
+			} else if ("object" === typeof jml[i] && jml[i] !== null && elem.nodeType === 1) {
+				// add attributes
+				elem = addAttributes(elem, jml[i]);
+			}
+		}
+
+		return elem;
+	}
+
 	/*DOM*/ JsonML.parse = function(/*JsonML*/ jml, /*function*/ filter) {
 		try {
 			if (!jml) {
@@ -314,7 +334,6 @@ if ("undefined" === typeof JsonML) {
 				throw new SyntaxError("invalid JsonML");
 			}
 
-			var i;
 			var tagName = jml[0]; // tagName
 			if (!tagName) {
 				// correctly handle a list of JsonML trees
@@ -322,7 +341,7 @@ if ("undefined" === typeof JsonML) {
 				var frag = document.createDocumentFragment ?
 					document.createDocumentFragment() :
 					document.createElement("");
-				for (i=1; i<jml.length; i++) {
+				for (var i=1; i<jml.length; i++) {
 					appendChild(frag, JsonML.parse(jml[i], filter));
 				}
 
@@ -336,33 +355,14 @@ if ("undefined" === typeof JsonML) {
 				return frag;
 			}
 
-			var css = (tagName.toLowerCase() === "style" && document.createStyleSheet);
-			var elem = css ?
+			if (tagName.toLowerCase() === "style" && document.createStyleSheet) {
 				// IE requires this interface for styles
-				document.createStyleSheet() :
-				document.createElement(tagName);
-
-			for (i=1; i<jml.length; i++) {
-				if (jml[i] instanceof Array || "string" === typeof jml[i]) {
-					if (css) {
-						// IE requires this interface for styles
-						elem.cssText = jml[i];
-					} else {
-						// append children
-						appendChild(elem, JsonML.parse(jml[i], filter));
-					}
-				} else if (jml[i] instanceof Unparsed) {
-					appendChild(elem, hydrate(jml[i].value));
-				} else if ("object" === typeof jml[i] && jml[i] !== null && elem.nodeType === 1) {
-					// add attributes
-					elem = addAttributes(elem, jml[i]);
-				}
-			}
-
-			if (css) {
+				JsonML.patch(document.createStyleSheet(), jml, filter);
 				// in IE styles are effective immediately
 				return null;
 			}
+
+			var elem = patch(document.createElement(tagName), jml, filter);
 
 			// trim extraneous whitespace
 			trimWhitespace(elem);
@@ -376,6 +376,11 @@ if ("undefined" === typeof JsonML) {
 				return document.createTextNode("["+ex2+"]");
 			}
 		}
+	};
+
+	// interface for internal JsonML.BST use
+	JsonML.patch = function(/*DOM*/ elem, /*JsonML*/ jml, /*function*/ filter) {
+		return patch(elem, jml, filter);
 	};
 
 	/* Utility Methods -------------------------*/
