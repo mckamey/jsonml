@@ -1,18 +1,15 @@
 /*
-	JsonML_DOM.js
+	jsonml-dom.js
 	DOM to JsonML utility
 
 	Created: 2007-02-15-2235
 	Modified: 2008-08-31-2206
 
-	Copyright (c)2006-2009 Stephen M. McKamey
-	Distributed under an open-source license: http://jsonml.org/license
+	Copyright (c)2006-2010 Stephen M. McKamey
+	Distributed under The MIT License: http://jsonml.org/license
 */
 
-var JsonML;
-if ("undefined" === typeof JsonML) {
-	JsonML = {};
-}
+var JsonML = JsonML || {};
 
 /*JsonML*/ JsonML.parseDOM = function(/*DOM*/ elem, /*function*/ filter) {
 	if (!elem || !elem.nodeType) {

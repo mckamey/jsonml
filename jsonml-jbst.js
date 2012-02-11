@@ -1,14 +1,14 @@
 /*
-	JsonML_BST.js
+	jsonml-jbst.js
 	JsonML + Browser-Side Templating (JBST)
 
 	Created: 2008-07-28-2337
 	Modified: 2010-09-13-1952
 
 	Copyright (c)2006-2010 Stephen M. McKamey
-	Distributed under an open-source license: http://jsonml.org/license
+	Distributed under The MIT License: http://jsonml.org/license
 
-    This file creates a JsonML.BST type containing these methods:
+	This file creates a JsonML.BST type containing these methods:
 
 		// JBST + JSON => DOM
 		var dom = JsonML.BST(jbst).bind(data);
@@ -52,10 +52,7 @@
 */
 
 /* namespace JsonML */
-var JsonML;
-if ("undefined" === typeof JsonML) {
-	JsonML = {};
-}
+var JsonML = JsonML || {};
 
 JsonML.BST = (function(){
 

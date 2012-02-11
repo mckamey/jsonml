@@ -1,37 +1,37 @@
 /*global JSON */
 /*
-	JsonML2.js
+	jsonml2.js
 	JsonML builder
 
 	Created: 2006-11-09-0116
 	Modified: 2010-09-13-1952
 
 	Copyright (c)2006-2010 Stephen M. McKamey
-	Distributed under an open-source license: http://jsonml.org/license
+	Distributed under The MIT License: http://jsonml.org/license
 
-    This file creates a global JsonML object containing these methods:
+	This file creates a global JsonML object containing these methods:
 
-        JsonML.parse(string|array, filter)
+		JsonML.parse(string|array, filter)
 
-            This method produces a tree of DOM elements from a JsonML tree. The
-            array must not contain any cyclical references.
+			This method produces a tree of DOM elements from a JsonML tree. The
+			array must not contain any cyclical references.
 
-            The optional filter parameter is a function which can filter and
-            transform the results. It receives each of the DOM nodes, and
-            its return value is used instead of the original value. If it
-            returns what it received, then structure is not modified. If it
-            returns undefined then the member is deleted.
+			The optional filter parameter is a function which can filter and
+			transform the results. It receives each of the DOM nodes, and
+			its return value is used instead of the original value. If it
+			returns what it received, then structure is not modified. If it
+			returns undefined then the member is deleted.
 
 			This is useful for binding unobtrusive JavaScript to the generated
 			DOM elements.
 
-            Example:
+			Example:
 
-            // Parses the structure. If an element has a specific CSS value then
-            // takes appropriate action: Remove from results, add special event
-            // handlers, or bind to a custom component.
+			// Parses the structure. If an element has a specific CSS value then
+			// takes appropriate action: Remove from results, add special event
+			// handlers, or bind to a custom component.
 
-            var myUI = JsonML.parse(myUITemplate, function (elem) {
+			var myUI = JsonML.parse(myUITemplate, function (elem) {
 				if (elem.className.indexOf("Remove-Me") >= 0) {
 					// this will remove from resulting DOM tree
 					return null;
@@ -90,10 +90,7 @@
 			array JsonML.getChildren(jml);
 */
 
-var JsonML;
-if ("undefined" === typeof JsonML) {
-	JsonML = {};
-}
+var JsonML = JsonML || {};
 
 (function() {
 
