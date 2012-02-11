@@ -29,7 +29,7 @@
 		JsonML.BST.onerror = function(ex) {
 			// access the current context via this.data, this.index, etc.
 			// display custom inline error messages
-			return "["+ex+"]";
+			return '['+ex+']';
 		};
 
 		// implement onbound event to perform custom processing of elements after binding
@@ -46,7 +46,7 @@
 			// access the current context via this.data, this.index, etc.
 			// watch elements as they are added
 			if (window.console) {
-				console.log(JsonML.getTagName(parent)+" > "+JsonML.getTagName(child));
+				console.log(JsonML.getTagName(parent)+' > '+JsonML.getTagName(child));
 			}
 		};
 */
@@ -55,10 +55,11 @@
 var JsonML = JsonML || {};
 
 JsonML.BST = (function(){
+	'use strict';
 
-	var SHOW = "jbst:visible",
-		INIT = "jbst:oninit",
-		LOAD = "jbst:onload";
+	var SHOW = 'jbst:visible',
+		INIT = 'jbst:oninit',
+		LOAD = 'jbst:onload';
 
 	// ensures attribute key contains method or is removed
 	// attr: attribute object
@@ -67,7 +68,7 @@ JsonML.BST = (function(){
 		var method = attr[key] || null;
 		if (method) {
 			// ensure is method
-			if ("function" !== typeof method) {
+			if ('function' !== typeof method) {
 				try {
 					/*jslint evil:true */
 					method = new Function(String(method));
@@ -88,7 +89,7 @@ JsonML.BST = (function(){
 
 	// default onerror handler, override JsonML.BST.onerror to change
 	/*JsonML*/ function onError(/*Error*/ ex) {
-		return "["+ex+"]";
+		return '['+ex+']';
 	}
 
 	// retrieve and remove method
@@ -113,14 +114,14 @@ JsonML.BST = (function(){
 
 		// execute and remove jbst:oninit method
 		var method = popMethod(elem, INIT);
-		if ("function" === typeof method) {
+		if ('function' === typeof method) {
 			// execute in context of element
 			method.call(elem);
 		}
 
 		// execute and remove jbst:onload method
 		method = popMethod(elem, LOAD);
-		if ("function" === typeof method) {
+		if ('function' === typeof method) {
 			// queue up to execute after insertion into parentNode
 			setTimeout(function() {
 				// execute in context of element
@@ -147,12 +148,12 @@ JsonML.BST = (function(){
 
 		try {
 			// setup context for code block
-			self.data = ("undefined" !== typeof data) ? data : null;
+			self.data = ('undefined' !== typeof data) ? data : null;
 			self.index = isFinite(index) ? Number(index) : NaN;
 			self.count = isFinite(count) ? Number(count) : NaN;
-			self.args = ("undefined" !== typeof args) ? args : null;
+			self.args = ('undefined' !== typeof args) ? args : null;
 
-			// execute node in the context of self as "this", passing in any parameters
+			// execute node in the context of self as 'this', passing in any parameters
 			return method.apply(self, methodArgs || []);
 
 		} finally {
@@ -166,8 +167,8 @@ JsonML.BST = (function(){
 
 	/* ctor */
 	function JBST(/*JsonML*/ jbst) {
-		if ("undefined" === typeof jbst) {
-			throw new Error("JBST tree is undefined");
+		if ('undefined' === typeof jbst) {
+			throw new Error('JBST tree is undefined');
 		}
 
 		var self = this,
@@ -188,12 +189,12 @@ JsonML.BST = (function(){
 				if (node) {
 					var output;
 
-					if ("function" === typeof node) {
+					if ('function' === typeof node) {
 						output = callContext(self, data, index, count, args, node);
 
 						if (output instanceof JBST) {
 							// allow returned JBSTs to recursively bind
-							// useful for creating "switcher" template methods
+							// useful for creating 'switcher' template methods
 							return output.dataBind(data, index, count, args);
 						}
 
@@ -202,8 +203,8 @@ JsonML.BST = (function(){
 					}
 
 					if (node instanceof Array) {
-						var onBound = ("function" === typeof JsonML.BST.onbound) && JsonML.BST.onbound,
-							onAppend = ("function" === typeof JsonML.BST.onappend) && JsonML.BST.onappend,
+						var onBound = ('function' === typeof JsonML.BST.onbound) && JsonML.BST.onbound,
+							onAppend = ('function' === typeof JsonML.BST.onappend) && JsonML.BST.onappend,
 							appendCB = onAppend && function(parent, child) {
 								callContext(self, data, index, count, args, onAppend, [parent, child]);
 							};
@@ -227,11 +228,11 @@ JsonML.BST = (function(){
 						if (JsonML.hasAttributes(output)) {
 							// visibility JBST command
 							var visible = output[1][SHOW];
-							if ("undefined" !== typeof visible) {
+							if ('undefined' !== typeof visible) {
 								// cull any false-y values
 								if (!visible) {
 									// suppress rendering of entire subtree
-									return "";
+									return '';
 								}
 								// remove attribute
 								delete output[1][SHOW];
@@ -248,14 +249,14 @@ JsonML.BST = (function(){
 						return output;
 					}
 
-					if ("object" === typeof node) {
+					if ('object' === typeof node) {
 						output = {};
 						// process each property in template node
 						for (var property in node) {
 							if (node.hasOwnProperty(property)) {
 								// evaluate property's value
 								var value = dataBind(node[property], data, index, count, args);
-								if ("undefined" !== typeof value && value !== null) {
+								if ('undefined' !== typeof value && value !== null) {
 									output[property] = value;
 								}
 							}
@@ -270,10 +271,10 @@ JsonML.BST = (function(){
 			} catch (ex) {
 				try {
 					// handle error with complete context
-					var err = ("function" === typeof JsonML.BST.onerror) ? JsonML.BST.onerror : onError;
+					var err = ('function' === typeof JsonML.BST.onerror) ? JsonML.BST.onerror : onError;
 					return callContext(self, data, index, count, args, err, [ex]);
 				} catch (ex2) {
-					return "["+ex2+"]";
+					return '['+ex2+']';
 				}
 			}
 		}
@@ -281,7 +282,7 @@ JsonML.BST = (function(){
 		/*JsonML*/ function iterate(/*JsonML*/ node, /*object*/ data, /*int*/ index, /*int*/ count, /*object*/ args) {
 			if (data instanceof Array) {
 				// create a document fragment to hold list
-				var output = [""];
+				var output = [''];
 
 				count = data.length;
 				for (var i=0; i<count; i++) {
@@ -316,7 +317,7 @@ JsonML.BST = (function(){
 
 		// replaces a DOM element with result from binding
 		/*void*/ self.replace = function(/*DOM*/ elem, /*object*/ data, /*int*/ index, /*int*/ count, /*object*/ args) {
-			if ("string" === typeof elem) {
+			if ('string' === typeof elem) {
 				elem = document.getElementById(elem);
 			}
 
@@ -330,7 +331,7 @@ JsonML.BST = (function(){
 
 		// displace a DOM element with result from binding JsonML+BST node bound within this context
 		/*void*/ self.displace = function(/*DOM*/ elem, /*JsonML*/ node, /*object*/ data, /*int*/ index, /*int*/ count, /*object*/ args) {
-			if ("string" === typeof elem) {
+			if ('string' === typeof elem) {
 				elem = document.getElementById(elem);
 			}
 
@@ -348,12 +349,12 @@ JsonML.BST = (function(){
 
 		// patches a DOM element with JsonML+BST node bound within this context
 		/*void*/ self.patch = function(/*DOM*/ elem, /*JsonML*/ node, /*object*/ data, /*int*/ index, /*int*/ count, /*object*/ args) {
-			if ("string" === typeof elem) {
+			if ('string' === typeof elem) {
 				elem = document.getElementById(elem);
 			}
 
 			if (elem) {
-				var jml = [""];
+				var jml = [''];
 				appendChild(jml, dataBind(node, data, index, count, args));
 				JsonML.patch(elem, jml, filter);
 			}
