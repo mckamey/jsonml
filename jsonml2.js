@@ -169,6 +169,8 @@ var JsonML = JsonML || {};
 						}
 					} else if (name === 'class') {
 						elem.className = value;
+					} else if (name === 'for') { // IE also doesn't like label's 'for' attribute in setAttribute
+						elem.htmlFor = value;
 					} else if (EVTS[name]) {
 						addHandler(elem, name, value);
 
