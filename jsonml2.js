@@ -97,24 +97,26 @@ var JsonML = JsonML || {};
 
 	//attribute name mapping
 	var ATTRMAP = {
-			rowspan : 'rowSpan',
-			colspan : 'colSpan',
-			cellpadding : 'cellPadding',
-			cellspacing : 'cellSpacing',
-			tabindex : 'tabIndex',
-			accesskey : 'accessKey',
-			hidefocus : 'hideFocus',
-			usemap : 'useMap',
-			maxlength : 'maxLength',
-			readonly : 'readOnly',
-			contenteditable : 'contentEditable'
+			'accesskey': 'accessKey',
+			'cellpadding': 'cellPadding',
+			'cellspacing': 'cellSpacing',
+			'colspan': 'colSpan',
+			'contenteditable': 'contentEditable',
+			'for': 'htmlFor',
+			'hidefocus': 'hideFocus',
+			'maxlength': 'maxLength',
+			'readonly': 'readOnly',
+			'rowspan': 'rowSpan',
+			'tabindex': 'tabIndex',
+			'usemap': 'useMap'
 			// can add more attributes here as needed
 		},
 
 		// attribute duplicates
 		ATTRDUP = {
-			enctype : 'encoding',
-			onscroll : 'DOMMouseScroll'
+			'enctype': 'encoding',
+			'onscroll': 'DOMMouseScroll',
+			'checked': 'defaultChecked'
 			// can add more attributes here as needed
 		},
 
