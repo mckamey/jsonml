@@ -1,12 +1,11 @@
-/*global JSON */
 /*
 	jsonml2.js
 	JsonML builder
 
 	Created: 2006-11-09-0116
-	Modified: 2010-09-13-1952
+	Modified: 2012-10-23-1249
 
-	Copyright (c)2006-2010 Stephen M. McKamey
+	Copyright (c)2006-2012 Stephen M. McKamey
 	Distributed under The MIT License: http://jsonml.org/license
 
 	This file creates a global JsonML object containing these methods:
@@ -95,60 +94,292 @@ var JsonML = JsonML || {};
 (function(JsonML) {
 	'use strict';
 
-	//attribute name mapping
-	var ATTRMAP = {
-			'accesskey': 'accessKey',
-			'cellpadding': 'cellPadding',
-			'cellspacing': 'cellSpacing',
-			'colspan': 'colSpan',
-			'contenteditable': 'contentEditable',
-			'for': 'htmlFor',
-			'hidefocus': 'hideFocus',
-			'maxlength': 'maxLength',
-			'readonly': 'readOnly',
-			'rowspan': 'rowSpan',
-			'tabindex': 'tabIndex',
-			'usemap': 'useMap'
-			// can add more attributes here as needed
-		},
+	/**
+	 * Attribute name map
+	 * 
+	 * @private
+	 * @constant
+	 * @type {Object.<string>}
+	 */
+	var ATTR_MAP = {
+		'accesskey': 'accessKey',
+		'bgcolor': 'bgColor',
+		'cellpadding': 'cellPadding',
+		'cellspacing': 'cellSpacing',
+		'checked': 'defaultChecked',
+		'class': 'className',
+		'colspan': 'colSpan',
+		'contenteditable': 'contentEditable',
+		'defaultchecked': 'defaultChecked',
+		'for': 'htmlFor',
+		'formnovalidate': 'formNoValidate',
+		'hidefocus': 'hideFocus',
+		'ismap': 'isMap',
+		'maxlength': 'maxLength',
+		'novalidate': 'noValidate',
+		'readonly': 'readOnly',
+		'rowspan': 'rowSpan',
+		'spellcheck': 'spellCheck',
+		'tabindex': 'tabIndex',
+		'usemap': 'useMap',
+		'willvalidate': 'willValidate'
+		// can add more attributes here as needed
+	};
 
-		// attribute duplicates
-		ATTRDUP = {
-			'enctype': 'encoding',
-			'onscroll': 'DOMMouseScroll',
-			'checked': 'defaultChecked'
-			// can add more attributes here as needed
-		},
+	/**
+	 * Attribute duplicates map
+	 * 
+	 * @private
+	 * @constant
+	 * @type {Object.<string>}
+	 */
+	var ATTR_DUP = {
+		'enctype': 'encoding',
+		'onscroll': 'DOMMouseScroll'
+		// can add more attributes here as needed
+	};
 
-		// event names
-		EVTS = (function(/*string[]*/ names) {
-			var evts = {};
-			while (names.length) {
-				var evt = names.shift();
-				evts['on'+evt.toLowerCase()] = evt;
-			}
-			return evts;
-		})('blur,change,click,dblclick,error,focus,keydown,keypress,keyup,load,mousedown,mouseenter,mouseleave,mousemove,mouseout,mouseover,mouseup,resize,scroll,select,submit,unload'.split(','));
+	/**
+	 * Boolean attribute map
+	 * 
+	 * @private
+	 * @constant
+	 * @type {Object.<number>}
+	 */
+	var ATTR_BOOL = {
+		'async': 1,
+		'autofocus': 1,
+		'checked': 1,
+		'defaultchecked': 1,
+		'defer': 1,
+		'disabled': 1,
+		'formnovalidate': 1,
+		'hidden': 1,
+		'indeterminate': 1,
+		'ismap': 1,
+		'multiple': 1,
+		'novalidate': 1,
+		'readonly': 1,
+		'required': 1,
+		'spellcheck': 1,
+		'willvalidate': 1
+		// can add more attributes here as needed
+	};
 
-	/*void*/ function addHandler(/*DOM*/ elem, /*string*/ name, /*function*/ handler) {
-		if ('string' === typeof handler) {
-			/*jslint evil:true */
-			handler = new Function('event', handler);
-			/*jslint evil:false */
-		}
+	/**
+	 * Leading SGML line ending pattern
+	 * 
+	 * @private
+	 * @constant
+	 * @type {RegExp}
+	 */
+	var LEADING = /^[\r\n]+/;
 
-		if ('function' !== typeof handler) {
-			return;
-		}
+	/**
+	 * Trailing SGML line ending pattern
+	 * 
+	 * @private
+	 * @constant
+	 * @type {RegExp}
+	 */
+	var TRAILING = /[\r\n]+$/;
 
-		elem[name] = handler;
+	/**
+	 * @private
+	 * @const
+	 * @type {number}
+	 */
+	var NUL = 0;
+
+	/**
+	 * @private
+	 * @const
+	 * @type {number}
+	 */
+	var FUN = 1;
+
+	/**
+	 * @private
+	 * @const
+	 * @type {number}
+	 */
+	var ARY = 2;
+
+	/**
+	 * @private
+	 * @const
+	 * @type {number}
+	 */
+	var OBJ = 3;
+
+	/**
+	 * @private
+	 * @const
+	 * @type {number}
+	 */
+	var VAL = 4;
+
+	/**
+	 * @private
+	 * @const
+	 * @type {number}
+	 */
+	var RAW = 5;
+
+	/**
+	 * Wraps a data value to maintain as raw markup in output
+	 * 
+	 * @private
+	 * @this {Markup}
+	 * @param {string} value The value
+	 * @constructor
+	 */
+	function Markup(value) {
+		/**
+		 * @type {string}
+		 * @const
+		 * @protected
+		 */
+		this.value = value;
 	}
 
-	/*DOM*/ function addAttributes(/*DOM*/ elem, /*object*/ attr) {
-		if (attr.name && document.attachEvent) {
+	/**
+	 * Renders the value
+	 * 
+	 * @public
+	 * @override
+	 * @this {Markup}
+	 * @return {string} value
+	 */
+	Markup.prototype.toString = function() {
+		return this.value;
+	};
+
+	/**
+	 * Determines if the value is an Array
+	 * 
+	 * @private
+	 * @param {*} val the object being tested
+	 * @return {boolean}
+	 */
+	var isArray = Array.isArray || function(val) {
+		return (val instanceof Array);
+	};
+
+	/**
+	 * Determines if the value is a function
+	 * 
+	 * @private
+	 * @param {*} val the object being tested
+	 * @return {boolean}
+	 */
+	function isFunction(val) {
+		return (typeof val === 'function');
+	}
+
+	/**
+	 * Determines the type of the value
+	 * 
+	 * @private
+	 * @param {*} val the object being tested
+	 * @return {number}
+	 */
+	function getType(val) {
+		switch (typeof val) {
+			case 'object':
+				return !val ? NUL : (isArray(val) ? ARY : ((val instanceof Markup) ? RAW : ((val instanceof Date) ? VAL : OBJ)));
+			case 'function':
+				return FUN;
+			case 'undefined':
+				return NUL;
+			default:
+				return VAL;
+		}
+	}
+
+	/**
+	 * Creates a DOM element 
+	 * 
+	 * @private
+	 * @param {string} tag The element's tag name
+	 * @return {Node}
+	 */
+	function createElement(tag) {
+		if (!tag) {
+			// create a document fragment to hold multiple-root elements
+			if (document.createDocumentFragment) {
+				return document.createDocumentFragment();
+			}
+
+			tag = '';
+
+		} else if (tag.charAt(0) === '!') {
+			return document.createComment(tag === '!' ? '' : tag.substr(1)+' ');
+		}
+
+		if (tag.toLowerCase() === 'style' && document.createStyleSheet) {
+			// IE requires this interface for styles
+			return document.createStyleSheet();
+		}
+
+		return document.createElement(tag);
+	}
+
+	/**
+	 * Adds an event handler to an element
+	 * 
+	 * @private
+	 * @param {Node} elem The element
+	 * @param {string} name The event name
+	 * @param {function(Event)} handler The event handler
+	 */
+	function addHandler(elem, name, handler) {
+		if (name.substr(0,2) === 'on') {
+			name = name.substr(2);
+		}
+
+		switch (typeof handler) {
+			case 'function':
+				if (elem.addEventListener) {
+					// DOM Level 2
+					elem.addEventListener(name, handler, false);
+
+				} else if (elem.attachEvent && getType(elem[name]) !== NUL) {
+					// IE legacy events
+					elem.attachEvent('on'+name, handler);
+
+				} else {
+					// DOM Level 0
+					var old = elem['on'+name] || elem[name];
+					elem['on'+name] = elem[name] = !isFunction(old) ? handler :
+						function(e) {
+							return (old.call(this, e) !== false) && (handler.call(this, e) !== false);
+						};
+				}
+				break;
+
+			case 'string':
+				// inline functions are DOM Level 0
+				/*jslint evil:true */
+				elem['on'+name] = new Function('event', handler);
+				/*jslint evil:false */
+				break;
+		}
+	}
+
+	/**
+	 * Appends an attribute to an element
+	 * 
+	 * @private
+	 * @param {Node} elem The element
+	 * @param {Object} attr Attributes object
+	 * @return {Node}
+	 */
+	function addAttributes(elem, attr) {
+		if (attr.name && document.attachEvent && !elem.parentNode) {
 			try {
 				// IE fix for not being able to programatically change the name attribute
-				var alt = document.createElement('<'+elem.tagName+' name="'+attr.name+'">');
+				var alt = createElement('<'+elem.tagName+' name="'+attr.name+'">');
 				// fix for Opera 8.5 and Netscape 7.1 creating malformed elements
 				if (elem.tagName === alt.tagName) {
 					elem = alt;
@@ -160,39 +391,68 @@ var JsonML = JsonML || {};
 		for (var name in attr) {
 			if (attr.hasOwnProperty(name)) {
 				// attributeValue
-				var value = attr[name];
-				if (name && value !== null && 'undefined' !== typeof value) {
-					name = ATTRMAP[name.toLowerCase()] || name;
+				var value = attr[name],
+					type = getType(value);
+
+				if (name) {
+					if (type === NUL) {
+						value = '';
+						type = VAL;
+					}
+
+					name = ATTR_MAP[name.toLowerCase()] || name;
+					if (ATTR_BOOL[name.toLowerCase()]) {
+						value = !!value;
+					}
+
 					if (name === 'style') {
-						if ('undefined' !== typeof elem.style.cssText) {
+						if (getType(elem.style.cssText) !== NUL) {
 							elem.style.cssText = value;
 						} else {
 							elem.style = value;
 						}
-					} else if (name === 'class') {
-						elem.className = value;
-					} else if (EVTS[name]) {
+
+					} else if (name.substr(0,2) === 'on') {
 						addHandler(elem, name, value);
 
 						// also set duplicated events
-						if (ATTRDUP[name]) {
-							addHandler(elem, ATTRDUP[name], value);
+						name = ATTR_DUP[name];
+						if (name) {
+							addHandler(elem, name, value);
 						}
-					} else if ('string' === typeof value || 'number' === typeof value || 'boolean' === typeof value) {
+
+					} else if (type !== VAL || name.charAt(0) === '$' || getType(elem[name]) !== NUL || getType(elem[ATTR_DUP[name]]) !== NUL) {
+						// direct setting of existing properties
+						elem[name] = value;
+
+						// also set duplicated properties
+						name = ATTR_DUP[name];
+						if (name) {
+							elem[name] = value;
+						}
+
+					} else if (ATTR_BOOL[name.toLowerCase()]) {
+						if (value) {
+							// boolean attributes
+							elem.setAttribute(name, name);
+
+							// also set duplicated attributes
+							name = ATTR_DUP[name];
+							if (name) {
+								elem.setAttribute(name, name);
+							}
+						}
+
+					} else {
+						// http://www.quirksmode.org/dom/w3c_core.html#attributes
+
+						// custom and 'data-*' attributes
 						elem.setAttribute(name, value);
 
 						// also set duplicated attributes
-						if (ATTRDUP[name]) {
-							elem.setAttribute(ATTRDUP[name], value);
-						}
-					} else {
-
-						// allow direct setting of complex properties
-						elem[name] = value;
-
-						// also set duplicated attributes
-						if (ATTRDUP[name]) {
-							elem[ATTRDUP[name]] = value;
+						name = ATTR_DUP[name];
+						if (name) {
+							elem.setAttribute(name, value);
 						}
 					}
 				}
@@ -201,37 +461,53 @@ var JsonML = JsonML || {};
 		return elem;
 	}
 
-	/*void*/ function appendChild(/*DOM*/ elem, /*DOM*/ child) {
+	/**
+	 * Appends a child to an element
+	 * 
+	 * @private
+	 * @param {Node} elem The parent element
+	 * @param {Node} child The child
+	 */
+	function appendDOM(elem, child) {
 		if (child) {
-			if (elem.tagName && elem.tagName.toLowerCase() === 'table' && elem.tBodies) {
+			var tag = (elem.tagName||'').toLowerCase();
+			if (elem.nodeType === 8) { // comment
+				if (child.nodeType === 3) { // text node
+					elem.nodeValue += child.nodeValue;
+				}
+			} else if (tag === 'table' && elem.tBodies) {
 				if (!child.tagName) {
 					// must unwrap documentFragment for tables
 					if (child.nodeType === 11) {
 						while (child.firstChild) {
-							appendChild(elem, child.removeChild(child.firstChild));
+							appendDOM(elem, child.removeChild(child.firstChild));
 						}
 					}
 					return;
 				}
+
 				// in IE must explicitly nest TRs in TBODY
 				var childTag = child.tagName.toLowerCase();// child tagName
 				if (childTag && childTag !== 'tbody' && childTag !== 'thead') {
 					// insert in last tbody
 					var tBody = elem.tBodies.length > 0 ? elem.tBodies[elem.tBodies.length-1] : null;
 					if (!tBody) {
-						tBody = document.createElement(childTag === 'th' ? 'thead' : 'tbody');
+						tBody = createElement(childTag === 'th' ? 'thead' : 'tbody');
 						elem.appendChild(tBody);
 					}
 					tBody.appendChild(child);
 				} else if (elem.canHaveChildren !== false) {
 					elem.appendChild(child);
 				}
-			} else if (elem.tagName && elem.tagName.toLowerCase() === 'style' && document.createStyleSheet) {
+
+			} else if (tag === 'style' && document.createStyleSheet) {
 				// IE requires this interface for styles
 				elem.cssText = child;
+
 			} else if (elem.canHaveChildren !== false) {
 				elem.appendChild(child);
-			} else if (elem.tagName && elem.tagName.toLowerCase() === 'object' &&
+
+			} else if (tag === 'object' &&
 				child.tagName && child.tagName.toLowerCase() === 'param') {
 					// IE-only path
 					try {
@@ -246,27 +522,63 @@ var JsonML = JsonML || {};
 		}
 	}
 
-	/*bool*/ function isWhitespace(/*DOM*/ node) {
-		return node && (node.nodeType === 3) && (!node.nodeValue || !/\S/.exec(node.nodeValue));
+	/**
+	 * Tests a node for whitespace
+	 * 
+	 * @private
+	 * @param {Node} node The node
+	 * @return {boolean}
+	 */
+	function isWhitespace(node) {
+		return !!node && (node.nodeType === 3) && (!node.nodeValue || !/\S/.exec(node.nodeValue));
 	}
 
-	/*void*/ function trimWhitespace(/*DOM*/ elem) {
+	/**
+	 * Trims whitespace pattern from the text node
+	 * 
+	 * @private
+	 * @param {Node} node The node
+	 */
+	function trimPattern(node, pattern) {
+		if (!!node && (node.nodeType === 3) && pattern.exec(node.nodeValue)) {
+			node.nodeValue = node.nodeValue.replace(pattern, '');
+		}
+	}
+
+	/**
+	 * Removes leading and trailing whitespace nodes
+	 * 
+	 * @private
+	 * @param {Node} elem The node
+	 */
+	function trimWhitespace(elem) {
 		if (elem) {
 			while (isWhitespace(elem.firstChild)) {
 				// trim leading whitespace text nodes
 				elem.removeChild(elem.firstChild);
 			}
+			// trim leading whitespace text
+			trimPattern(elem.firstChild, LEADING);
 			while (isWhitespace(elem.lastChild)) {
 				// trim trailing whitespace text nodes
 				elem.removeChild(elem.lastChild);
 			}
+			// trim trailing whitespace text
+			trimPattern(elem.lastChild, TRAILING);
 		}
 	}
 
-	/*DOM*/ function hydrate(/*string*/ value) {
-		var wrapper = document.createElement('div');
-		wrapper.innerHTML = value;
-
+	/**
+	 * Converts the markup to DOM nodes
+	 * 
+	 * @private
+	 * @param {string|Markup} value The node
+	 * @return {Node}
+	 */
+	function toDOM(value) {
+		var wrapper = createElement('div');
+		wrapper.innerHTML = ''+value;
+	
 		// trim extraneous whitespace
 		trimWhitespace(wrapper);
 
@@ -276,26 +588,27 @@ var JsonML = JsonML || {};
 		}
 
 		// create a document fragment to hold elements
-		var frag = document.createDocumentFragment ?
-			document.createDocumentFragment() :
-			document.createElement('');
-
+		var frag = createElement('');
 		while (wrapper.firstChild) {
 			frag.appendChild(wrapper.firstChild);
 		}
 		return frag;
 	}
 
-	function Unparsed(/*string*/ value) {
-		this.value = value;
-	}
-
-	JsonML.raw = function(/*string*/ value) {
-		return new Unparsed(value);
+	/**
+	 * @param {string} value
+	 * @return {Markup}
+	 */
+	JsonML.raw = function(value) {
+		return new Markup(value);
 	};
 
-	// default error handler
-	/*DOM*/ function onError(/*Error*/ ex, /*JsonML*/ jml, /*function*/ filter) {
+	/**
+	 * Default error handler
+	 * @param {Error} ex
+	 * @return {Node}
+	 */
+	function onError(ex) {
 		return document.createTextNode('['+ex+']');
 	}
 
@@ -307,9 +620,9 @@ var JsonML = JsonML || {};
 		for (var i=1; i<jml.length; i++) {
 			if (jml[i] instanceof Array || 'string' === typeof jml[i]) {
 				// append children
-				appendChild(elem, JsonML.parse(jml[i], filter));
-			} else if (jml[i] instanceof Unparsed) {
-				appendChild(elem, hydrate(jml[i].value));
+				appendDOM(elem, JsonML.parse(jml[i], filter));
+			} else if (jml[i] instanceof Markup) {
+				appendDOM(elem, toDOM(jml[i].value));
 			} else if ('object' === typeof jml[i] && jml[i] !== null && elem.nodeType === 1) {
 				// add attributes
 				elem = addAttributes(elem, jml[i]);
@@ -327,8 +640,8 @@ var JsonML = JsonML || {};
 			if ('string' === typeof jml) {
 				return document.createTextNode(jml);
 			}
-			if (jml instanceof Unparsed) {
-				return hydrate(jml.value);
+			if (jml instanceof Markup) {
+				return toDOM(jml.value);
 			}
 			if (!JsonML.isElement(jml)) {
 				throw new SyntaxError('invalid JsonML');
@@ -342,7 +655,7 @@ var JsonML = JsonML || {};
 					document.createDocumentFragment() :
 					document.createElement('');
 				for (var i=1; i<jml.length; i++) {
-					appendChild(frag, JsonML.parse(jml[i], filter));
+					appendDOM(frag, JsonML.parse(jml[i], filter));
 				}
 
 				// trim extraneous whitespace
@@ -481,7 +794,7 @@ var JsonML = JsonML || {};
 
 				// result was a JsonML node
 				parent.push(child);
-			} else if (child instanceof Unparsed) {
+			} else if (child instanceof Markup) {
 				if (!JsonML.isElement(parent)) {
 					throw new SyntaxError('invalid JsonML');
 				}
