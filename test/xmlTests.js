@@ -17,9 +17,6 @@ test('JsonML.parseXML/.renderXML roundtrip', function() {
 			'</book>'+
 		'</catalog>';
 
-	// JsonML will strip the XML Declaration
-	var input = '<?xml version="1.0" encoding="UTF-8"?>' + expected;
-
 	var dom = JsonML.parseXML(expected);
 	var actual = JsonML.renderXML(dom);
 
@@ -261,7 +258,7 @@ test('JsonML.fromXMLText/.toXMLText roundtrip', function() {
 	// JsonML will strip the XML Declaration
 	var input = '<?xml version="1.0"?>' + expected;
 
-	var jml = JsonML.fromXMLText(expected);
+	var jml = JsonML.fromXMLText(input);
 	var actual = JsonML.toXMLText(jml);
 
 	same(actual, expected);
@@ -298,7 +295,7 @@ test('JsonML.fromXMLText/.toXMLText roundtrip, namespaces', function() {
 	// JsonML will strip the XML Declaration
 	var input = '<?xml version="1.0"?>' + expected;
 
-	var jml = JsonML.fromXMLText(expected);
+	var jml = JsonML.fromXMLText(input);
 	var actual = JsonML.toXMLText(jml);
 
 	same(actual, expected);
