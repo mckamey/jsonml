@@ -1,16 +1,16 @@
 /*
-	jsonml2.js
-	JsonML builder
+	jsonml-html.js
+	JsonML to HTML utility
 
 	Created: 2006-11-09-0116
-	Modified: 2012-10-23-1249
+	Modified: 2012-11-03-2051
 
 	Copyright (c)2006-2012 Stephen M. McKamey
 	Distributed under The MIT License: http://jsonml.org/license
 
-	This file creates a global JsonML object containing these methods:
+	This file ensures a global JsonML object adding these methods:
 
-		JsonML.parse(string|array, filter)
+		JsonML.toHTML(JsonML, filter)
 
 			This method produces a tree of DOM elements from a JsonML tree. The
 			array must not contain any cyclical references.
@@ -30,7 +30,7 @@
 			// takes appropriate action: Remove from results, add special event
 			// handlers, or bind to a custom component.
 
-			var myUI = JsonML.parse(myUITemplate, function (elem) {
+			var myUI = JsonML.toHTML(myUITemplate, function (elem) {
 				if (elem.className.indexOf('Remove-Me') >= 0) {
 					// this will remove from resulting DOM tree
 					return null;
@@ -50,48 +50,19 @@
 				return elem;
 			});
 
-			// Implement onerror to handle any runtime errors while binding:
-			JsonML.onerror = function (ex, jml, filter) {
-				// display inline error message
-				return document.createTextNode('['+ex+']');
-			};
+		JsonML.renderHTML(JsonML)
+			Converts JsonML to HTML text
 
-		Utility methods for manipulating JsonML elements:
-
-			// tests if a given object is a valid JsonML element
-			bool JsonML.isElement(jml);
-
-			// gets the name of a JsonML element
-			string JsonML.getTagName(jml);
-
-			// tests if a given object is a JsonML attributes collection
-			bool JsonML.isAttributes(jml);
-
-			// tests if a JsonML element has a JsonML attributes collection
-			bool JsonML.hasAttributes(jml);
-
-			// gets the attributes collection for a JsonML element
-			object JsonML.getAttributes(jml);
-
-			// sets multiple attributes for a JsonML element
-			void JsonML.addAttributes(jml, attr);
-
-			// gets a single attribute for a JsonML element
-			object JsonML.getAttribute(jml, key);
-
-			// sets a single attribute for a JsonML element
-			void JsonML.setAttribute(jml, key, value);
-
-			// appends a JsonML child node to a parent JsonML element
-			void JsonML.appendChild(parent, child);
-
-			// gets an array of the child nodes of a JsonML element
-			array JsonML.getChildren(jml);
+		// Implement onerror to handle any runtime errors while binding:
+		JsonML.onerror = function (ex, jml, filter) {
+			// display inline error message
+			return document.createTextNode('['+ex+']');
+		};
 */
 
 var JsonML = JsonML || {};
 
-(function(JsonML) {
+(function(JsonML, document) {
 	'use strict';
 
 	/**
@@ -256,6 +227,22 @@ var JsonML = JsonML || {};
 	};
 
 	/**
+	 * @param {string} value
+	 * @return {Markup}
+	 */
+	JsonML.raw = function(value) {
+		return new Markup(value);
+	};
+
+	/**
+	 * @param {*} value
+	 * @return {boolean}
+	 */
+	var isMarkup = JsonML.isRaw = function(value) {
+		return (value instanceof Markup);
+	};
+
+	/**
 	 * Determines if the value is an Array
 	 * 
 	 * @private
@@ -287,7 +274,7 @@ var JsonML = JsonML || {};
 	function getType(val) {
 		switch (typeof val) {
 			case 'object':
-				return !val ? NUL : (isArray(val) ? ARY : ((val instanceof Markup) ? RAW : ((val instanceof Date) ? VAL : OBJ)));
+				return !val ? NUL : (isArray(val) ? ARY : (isMarkup(val) ? RAW : ((val instanceof Date) ? VAL : OBJ)));
 			case 'function':
 				return FUN;
 			case 'undefined':
@@ -304,7 +291,7 @@ var JsonML = JsonML || {};
 	 * @param {string} tag The element's tag name
 	 * @return {Node}
 	 */
-	function createElement(tag) {
+	var createElement = function(tag) {
 		if (!tag) {
 			// create a document fragment to hold multiple-root elements
 			if (document.createDocumentFragment) {
@@ -323,7 +310,7 @@ var JsonML = JsonML || {};
 		}
 
 		return document.createElement(tag);
-	}
+	};
 
 	/**
 	 * Adds an event handler to an element
@@ -333,7 +320,7 @@ var JsonML = JsonML || {};
 	 * @param {string} name The event name
 	 * @param {function(Event)} handler The event handler
 	 */
-	function addHandler(elem, name, handler) {
+	var addHandler = function(elem, name, handler) {
 		if (name.substr(0,2) === 'on') {
 			name = name.substr(2);
 		}
@@ -365,7 +352,7 @@ var JsonML = JsonML || {};
 				/*jslint evil:false */
 				break;
 		}
-	}
+	};
 
 	/**
 	 * Appends an attribute to an element
@@ -375,7 +362,7 @@ var JsonML = JsonML || {};
 	 * @param {Object} attr Attributes object
 	 * @return {Node}
 	 */
-	function addAttributes(elem, attr) {
+	var addAttributes = function(elem, attr) {
 		if (attr.name && document.attachEvent && !elem.parentNode) {
 			try {
 				// IE fix for not being able to programatically change the name attribute
@@ -459,7 +446,7 @@ var JsonML = JsonML || {};
 			}
 		}
 		return elem;
-	}
+	};
 
 	/**
 	 * Appends a child to an element
@@ -468,7 +455,7 @@ var JsonML = JsonML || {};
 	 * @param {Node} elem The parent element
 	 * @param {Node} child The child
 	 */
-	function appendDOM(elem, child) {
+	var appendDOM = function(elem, child) {
 		if (child) {
 			var tag = (elem.tagName||'').toLowerCase();
 			if (elem.nodeType === 8) { // comment
@@ -520,7 +507,7 @@ var JsonML = JsonML || {};
 					} catch (ex2) {}
 			}
 		}
-	}
+	};
 
 	/**
 	 * Tests a node for whitespace
@@ -529,9 +516,9 @@ var JsonML = JsonML || {};
 	 * @param {Node} node The node
 	 * @return {boolean}
 	 */
-	function isWhitespace(node) {
+	var isWhitespace = function(node) {
 		return !!node && (node.nodeType === 3) && (!node.nodeValue || !/\S/.exec(node.nodeValue));
-	}
+	};
 
 	/**
 	 * Trims whitespace pattern from the text node
@@ -539,11 +526,11 @@ var JsonML = JsonML || {};
 	 * @private
 	 * @param {Node} node The node
 	 */
-	function trimPattern(node, pattern) {
+	var trimPattern = function(node, pattern) {
 		if (!!node && (node.nodeType === 3) && pattern.exec(node.nodeValue)) {
 			node.nodeValue = node.nodeValue.replace(pattern, '');
 		}
-	}
+	};
 
 	/**
 	 * Removes leading and trailing whitespace nodes
@@ -551,7 +538,7 @@ var JsonML = JsonML || {};
 	 * @private
 	 * @param {Node} elem The node
 	 */
-	function trimWhitespace(elem) {
+	var trimWhitespace = function(elem) {
 		if (elem) {
 			while (isWhitespace(elem.firstChild)) {
 				// trim leading whitespace text nodes
@@ -566,7 +553,7 @@ var JsonML = JsonML || {};
 			// trim trailing whitespace text
 			trimPattern(elem.lastChild, TRAILING);
 		}
-	}
+	};
 
 	/**
 	 * Converts the markup to DOM nodes
@@ -575,7 +562,7 @@ var JsonML = JsonML || {};
 	 * @param {string|Markup} value The node
 	 * @return {Node}
 	 */
-	function toDOM(value) {
+	var toDOM = function(value) {
 		var wrapper = createElement('div');
 		wrapper.innerHTML = ''+value;
 	
@@ -593,14 +580,6 @@ var JsonML = JsonML || {};
 			frag.appendChild(wrapper.firstChild);
 		}
 		return frag;
-	}
-
-	/**
-	 * @param {string} value
-	 * @return {Markup}
-	 */
-	JsonML.raw = function(value) {
-		return new Markup(value);
 	};
 
 	/**
@@ -608,21 +587,30 @@ var JsonML = JsonML || {};
 	 * @param {Error} ex
 	 * @return {Node}
 	 */
-	function onError(ex) {
+	var onError = function(ex) {
 		return document.createTextNode('['+ex+']');
-	}
+	};
 
 	/* override this to perform custom error handling during binding */
 	JsonML.onerror = null;
 
-	/*DOM*/ function patch(/*DOM*/ elem, /*JsonML*/ jml, /*function*/ filter) {
+	/**
+	 * also used by JsonML.BST
+	 * @param {Node} elem
+	 * @param {*} jml
+	 * @param {function} filter
+	 * @return {Node}
+	 */
+	var patch = JsonML.patch = function(elem, jml, filter) {
 
 		for (var i=1; i<jml.length; i++) {
-			if (jml[i] instanceof Array || 'string' === typeof jml[i]) {
+			if (isArray(jml[i]) || 'string' === typeof jml[i]) {
 				// append children
-				appendDOM(elem, JsonML.parse(jml[i], filter));
-			} else if (jml[i] instanceof Markup) {
+				appendDOM(elem, toHTML(jml[i], filter));
+
+			} else if (isMarkup(jml[i])) {
 				appendDOM(elem, toDOM(jml[i].value));
+
 			} else if ('object' === typeof jml[i] && jml[i] !== null && elem.nodeType === 1) {
 				// add attributes
 				elem = addAttributes(elem, jml[i]);
@@ -630,9 +618,15 @@ var JsonML = JsonML || {};
 		}
 
 		return elem;
-	}
+	};
 
-	/*DOM*/ JsonML.parse = function(/*JsonML*/ jml, /*function*/ filter) {
+	/**
+	 * Main builder entry point
+	 * @param {string|array} jml
+	 * @param {function} filter
+	 * @return {Node}
+	 */
+	var toHTML = JsonML.toHTML = function(jml, filter) {
 		try {
 			if (!jml) {
 				return null;
@@ -640,10 +634,10 @@ var JsonML = JsonML || {};
 			if ('string' === typeof jml) {
 				return document.createTextNode(jml);
 			}
-			if (jml instanceof Markup) {
+			if (isMarkup(jml)) {
 				return toDOM(jml.value);
 			}
-			if (!JsonML.isElement(jml)) {
+			if (!isArray(jml) || ('string' !== typeof jml[0])) {
 				throw new SyntaxError('invalid JsonML');
 			}
 
@@ -651,11 +645,9 @@ var JsonML = JsonML || {};
 			if (!tagName) {
 				// correctly handle a list of JsonML trees
 				// create a document fragment to hold elements
-				var frag = document.createDocumentFragment ?
-					document.createDocumentFragment() :
-					document.createElement('');
+				var frag = createElement('');
 				for (var i=1; i<jml.length; i++) {
-					appendDOM(frag, JsonML.parse(jml[i], filter));
+					appendDOM(frag, toHTML(jml[i], filter));
 				}
 
 				// trim extraneous whitespace
@@ -670,20 +662,20 @@ var JsonML = JsonML || {};
 
 			if (tagName.toLowerCase() === 'style' && document.createStyleSheet) {
 				// IE requires this interface for styles
-				JsonML.patch(document.createStyleSheet(), jml, filter);
+				patch(document.createStyleSheet(), jml, filter);
 				// in IE styles are effective immediately
 				return null;
 			}
 
-			var elem = patch(document.createElement(tagName), jml, filter);
+			var elem = patch(createElement(tagName), jml, filter);
 
 			// trim extraneous whitespace
 			trimWhitespace(elem);
-			return (elem && 'function' === typeof filter) ? filter(elem) : elem;
+			return (elem && isFunction(filter)) ? filter(elem) : elem;
 		} catch (ex) {
 			try {
 				// handle error with complete context
-				var err = ('function' === typeof JsonML.onerror) ? JsonML.onerror : onError;
+				var err = isFunction(JsonML.onerror) ? JsonML.onerror : onError;
 				return err(ex, jml, filter);
 			} catch (ex2) {
 				return document.createTextNode('['+ex2+']');
@@ -691,145 +683,25 @@ var JsonML = JsonML || {};
 		}
 	};
 
-	// interface for internal JsonML.BST use
-	JsonML.patch = function(/*DOM*/ elem, /*JsonML*/ jml, /*function*/ filter) {
-		return patch(elem, jml, filter);
-	};
-
-	/* Utility Methods -------------------------*/
-
-	/*bool*/ JsonML.isElement = function(/*JsonML*/ jml) {
-		return (jml instanceof Array) && ('string' === typeof jml[0]);
-	};
-
-	/*bool*/ JsonML.isFragment = function(/*JsonML*/ jml) {
-		return (jml instanceof Array) && (jml[0] === '');
-	};
-
-	/*string*/ JsonML.getTagName = function(/*JsonML*/ jml) {
-		return jml[0] || '';
-	};
-
-	/*bool*/ JsonML.isAttributes = function(/*JsonML*/ jml) {
-		return !!jml && ('object' === typeof jml) && !(jml instanceof Array);
-	};
-
-	/*bool*/ JsonML.hasAttributes = function(/*JsonML*/ jml) {
-		if (!JsonML.isElement(jml)) {
-			throw new SyntaxError('invalid JsonML');
+	/**
+	 * Not super efficient.
+	 * TODO: port render.js from DUEL
+	 * @param {string|array} jml JsonML structure
+	 * @return {string} HTML text
+	 */
+	JsonML.toHTMLText = function(jml, filter) {
+		var elem = toHTML(jml, filter);
+		if (elem.outerHTML) {
+			return elem.outerHTML;
 		}
 
-		return JsonML.isAttributes(jml[1]);
+		var parent = createElement('div');
+		parent.appendChild(elem);
+
+		var html = parent.innerHTML;
+		parent.removeChild(elem);
+
+		return html;
 	};
 
-	/*object*/ JsonML.getAttributes = function(/*JsonML*/ jml, /*bool*/ addIfMissing) {
-		if (JsonML.hasAttributes(jml)) {
-			return jml[1];
-		}
-
-		if (!addIfMissing) {
-			return undefined;
-		}
-
-		// need to add an attribute object
-		var name = jml.shift();
-		var attr = {};
-		jml.unshift(attr);
-		jml.unshift(name||'');
-		return attr;
-	};
-
-	/*void*/ JsonML.addAttributes = function(/*JsonML*/ jml, /*object*/ attr) {
-		if (!JsonML.isElement(jml) || !JsonML.isAttributes(attr)) {
-			throw new SyntaxError('invalid JsonML');
-		}
-
-		if (!JsonML.isAttributes(jml[1])) {
-			// just insert attributes
-			var name = jml.shift();
-			jml.unshift(attr);
-			jml.unshift(name||'');
-			return;
-		}
-
-		// merge attribute objects
-		var old = jml[1];
-		for (var key in attr) {
-			if (attr.hasOwnProperty(key)) {
-				old[key] = attr[key];
-			}
-		}
-	};
-
-	/*string|number|bool*/ JsonML.getAttribute = function(/*JsonML*/ jml, /*string*/ key) {
-		if (!JsonML.hasAttributes(jml)) {
-			return undefined;
-		}
-		return jml[1][key];
-	};
-
-	/*void*/ JsonML.setAttribute = function(/*JsonML*/ jml, /*string*/ key, /*string|number|bool*/ value) {
-		JsonML.getAttributes(jml, true)[key] = value;
-	};
-
-	/*void*/ JsonML.appendChild = function(/*JsonML*/ parent, /*array|object|string*/ child) {
-		if (child instanceof Array && child[0] === '') {
-			// result was multiple JsonML sub-trees (i.e. documentFragment)
-			child.shift();// remove fragment ident
-
-			// directly append children
-			while (child.length) {
-				JsonML.appendChild(parent, child.shift(), arguments[2]);
-			}
-		} else if (child && 'object' === typeof child) {
-			if (child instanceof Array) {
-				if (!JsonML.isElement(parent) || !JsonML.isElement(child)) {
-					throw new SyntaxError('invalid JsonML');
-				}
-
-				if ('function' === typeof arguments[2]) {
-					// onAppend callback for JBST use
-					arguments[2](parent, child);
-				}
-
-				// result was a JsonML node
-				parent.push(child);
-			} else if (child instanceof Markup) {
-				if (!JsonML.isElement(parent)) {
-					throw new SyntaxError('invalid JsonML');
-				}
-
-				// result was a JsonML node
-				parent.push(child);
-			} else {
-				// result was JsonML attributes
-				JsonML.addAttributes(parent, child);
-			}
-		} else if ('undefined' !== typeof child && child !== null) {
-			if (!(parent instanceof Array)) {
-				throw new SyntaxError('invalid JsonML');
-			}
-
-			// must convert to string or JsonML will discard
-			child = String(child);
-
-			// skip processing empty string literals
-			if (child && parent.length > 1 && 'string' === typeof parent[parent.length-1]) {
-				// combine strings
-				parent[parent.length-1] += child;
-			} else if (child || !parent.length) {
-				// append
-				parent.push(child);
-			}
-		}
-	};
-
-	/*array*/ JsonML.getChildren = function(/*JsonML*/ jml) {
-		if (JsonML.hasAttributes(jml)) {
-			jml.slice(2);
-		}
-
-		jml.slice(1);
-	};
-
-})(JsonML);
+})(JsonML, document);

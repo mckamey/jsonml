@@ -8,6 +8,8 @@
 	Copyright (c)2006-2010 Stephen M. McKamey
 	Distributed under The MIT License: http://jsonml.org/license
 
+	NOTE: requires jsonml-html.js and jsonml-utils.js.
+
 	This file creates a JsonML.BST type containing these methods:
 
 		// JBST + JSON => DOM

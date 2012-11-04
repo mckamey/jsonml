@@ -1,37 +1,42 @@
 /*
 	jsonml-dom.js
-	DOM to JsonML utility
+	HTML to JsonML utility
 
 	Created: 2007-02-15-2235
-	Modified: 2008-08-31-2206
+	Modified: 2012-11-03-2051
 
-	Copyright (c)2006-2010 Stephen M. McKamey
+	Copyright (c)2006-2012 Stephen M. McKamey
 	Distributed under The MIT License: http://jsonml.org/license
 */
 
 var JsonML = JsonML || {};
 
-(function(JsonML){
+(function(JsonML, document){
 	'use strict';
 
-	/*JsonML*/ JsonML.parseDOM = function(/*DOM*/ elem, /*function*/ filter) {
+	var addChildren = function(/*DOM*/ elem, /*function*/ filter, /*JsonML*/ jml) {
+		if (elem.hasChildNodes()) {
+			for (var i=0; i<elem.childNodes.length; i++) {
+				var child = elem.childNodes[i];
+				child = fromHTML(child, filter);
+				if (child) {
+					jml.push(child);
+				}
+			}
+			return true;
+		}
+		return false;
+	};
+
+	/**
+	 * @param {Node} elem
+	 * @param {function} filter
+	 * @return {array} JsonML
+	 */
+	var fromHTML = JsonML.fromHTML = function(elem, filter) {
 		if (!elem || !elem.nodeType) {
 			// free references
 			return (elem = null);
-		}
-
-		function addChildren(/*DOM*/ elem, /*function*/ filter, /*JsonML*/ jml) {
-			if (elem.hasChildNodes()) {
-				for (var i=0; i<elem.childNodes.length; i++) {
-					var child = elem.childNodes[i];
-					child = JsonML.parseDOM(child, filter);
-					if (child) {
-						jml.push(child);
-					}
-				}
-				return true;
-			}
-			return false;
 		}
 
 		var i, jml;
@@ -75,7 +80,7 @@ var JsonML = JsonML || {};
 								child = elem.document;
 							}
 	
-							child = JsonML.parseDOM(child, filter);
+							child = fromHTML(child, filter);
 							if (child) {
 								jml.push(child);
 							}
@@ -90,7 +95,7 @@ var JsonML = JsonML || {};
 						} else if (elem.hasChildNodes()) {
 							for (i=0; i<elem.childNodes.length; i++) {
 								child = elem.childNodes[i];
-								child = JsonML.parseDOM(child, filter);
+								child = fromHTML(child, filter);
 								if (child && 'string' === typeof child) {
 									// unwrap comment blocks
 									child = child.replace('<!--', '').replace('-->', '');
@@ -187,10 +192,16 @@ var JsonML = JsonML || {};
 		}
 	};
 
-	/*JsonML*/ JsonML.parseHTML = function(/*string*/ html, /*function*/ filter) {
+	/**
+	 * @param {string} html HTML text
+	 * @param {function} filter
+	 * @return {array} JsonML
+	 */
+	JsonML.fromHTMLText = function(html, filter) {
 		var elem = document.createElement('div');
 		elem.innerHTML = html;
-		var jml = JsonML.parseDOM(elem, filter);
+
+		var jml = fromHTML(elem, filter);
 
 		// free references
 		elem = null;
@@ -204,4 +215,4 @@ var JsonML = JsonML || {};
 		return jml;
 	};
 
-})(JsonML);
+})(JsonML, document);
