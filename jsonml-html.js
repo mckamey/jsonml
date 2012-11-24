@@ -50,7 +50,7 @@
 				return elem;
 			});
 
-		JsonML.renderHTML(JsonML)
+		JsonML.toHTMLText(JsonML)
 			Converts JsonML to HTML text
 
 		// Implement onerror to handle any runtime errors while binding:

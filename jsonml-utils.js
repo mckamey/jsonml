@@ -177,7 +177,7 @@ var JsonML = JsonML || {};
 	 * @param {array|object|string} child
 	 */
 	var appendChild = JsonML.appendChild = function(parent, child) {
-		if (!isElement(parent)) {
+		if (!isArray(parent)) {
 			throw new SyntaxError('invalid JsonML');
 		}
 

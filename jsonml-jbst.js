@@ -167,14 +167,15 @@ JsonML.BST = (function(){
 		}
 	}
 
+	var appendChild = JsonML.appendChild;
+
 	/* ctor */
 	function JBST(/*JsonML*/ jbst) {
 		if ('undefined' === typeof jbst) {
 			throw new Error('JBST tree is undefined');
 		}
 
-		var self = this,
-			appendChild = JsonML.appendChild;
+		var self = this;
 
 		// recursively applies dataBind to all nodes of the template graph
 		// NOTE: it is very important to replace each node with a copy,
@@ -314,7 +315,7 @@ JsonML.BST = (function(){
 			var jml = iterate(jbst, data, index, count, args);
 
 			// hydrate the resulting JsonML, executing callbacks, and user-filter
-			return JsonML.parse(jml, filter);
+			return JsonML.toHTML(jml, filter);
 		};
 
 		// replaces a DOM element with result from binding
@@ -342,7 +343,7 @@ JsonML.BST = (function(){
 				var jml = iterate(node, data, index, count, args);
 
 				// hydrate the resulting JsonML, executing callbacks, and user-filter
-				jml = JsonML.parse(jml, filter);
+				jml = JsonML.toHTML(jml, filter);
 				if (jml) {
 					elem.parentNode.replaceChild(jml, elem);
 				}
