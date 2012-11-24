@@ -3,7 +3,7 @@
 	JsonML to HTML utility
 
 	Created: 2006-11-09-0116
-	Modified: 2012-11-03-2051
+	Modified: 2012-11-24-1051
 
 	Copyright (c)2006-2012 Stephen M. McKamey
 	Distributed under The MIT License: http://jsonml.org/license
@@ -107,6 +107,20 @@ var JsonML = JsonML || {};
 	var ATTR_DUP = {
 		'enctype': 'encoding',
 		'onscroll': 'DOMMouseScroll'
+		// can add more attributes here as needed
+	};
+
+	/**
+	 * Attributes to be set via DOM
+	 * 
+	 * @private
+	 * @constant
+	 * @type {Object.<number>}
+	 */
+	var ATTR_DOM = {
+		'autocapitalize': 1,
+		'autocomplete': 1,
+		'autocorrect': 1
 		// can add more attributes here as needed
 	};
 
@@ -388,9 +402,6 @@ var JsonML = JsonML || {};
 					}
 
 					name = ATTR_MAP[name.toLowerCase()] || name;
-					if (ATTR_BOOL[name.toLowerCase()]) {
-						value = !!value;
-					}
 
 					if (name === 'style') {
 						if (getType(elem.style.cssText) !== NUL) {
@@ -408,7 +419,7 @@ var JsonML = JsonML || {};
 							addHandler(elem, name, value);
 						}
 
-					} else if (type !== VAL || name.charAt(0) === '$' || getType(elem[name]) !== NUL || getType(elem[ATTR_DUP[name]]) !== NUL) {
+					} else if (!ATTR_DOM[name.toLowerCase()] && (type !== VAL || name.charAt(0) === '$' || getType(elem[name]) !== NUL || getType(elem[ATTR_DUP[name]]) !== NUL)) {
 						// direct setting of existing properties
 						elem[name] = value;
 
