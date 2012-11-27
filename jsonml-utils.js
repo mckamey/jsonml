@@ -236,10 +236,10 @@ var JsonML = JsonML || {};
 	 */
 	JsonML.getChildren = function(jml) {
 		if (hasAttributes(jml)) {
-			jml.slice(2);
+			return jml.slice(2);
 		}
 
-		jml.slice(1);
+		return jml.slice(1);
 	};
 
 })(JsonML);
