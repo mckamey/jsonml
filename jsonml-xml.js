@@ -26,12 +26,16 @@
 
 var JsonML = JsonML || {};
 
+if (typeof module === 'object') {
+	module.exports = JsonML;
+}
+
 (function(JsonML, document) {
 	'use strict';
 
 	/**
 	 * Determines if the value is an Array
-	 * 
+	 *
 	 * @private
 	 * @param {*} val the object being tested
 	 * @return {boolean}
@@ -41,8 +45,8 @@ var JsonML = JsonML || {};
 	};
 
 	/**
-	 * Creates a DOM element 
-	 * 
+	 * Creates a DOM element
+	 *
 	 * @private
 	 * @param {string} tag The element's tag name
 	 * @return {Node}
@@ -65,7 +69,7 @@ var JsonML = JsonML || {};
 
 	/**
 	 * Appends an attribute to an element
-	 * 
+	 *
 	 * @private
 	 * @param {Node} elem The element
 	 * @param {Object} attr Attributes object
@@ -84,7 +88,7 @@ var JsonML = JsonML || {};
 
 	/**
 	 * Appends a child to an element
-	 * 
+	 *
 	 * @private
 	 * @param {Node} elem The parent element
 	 * @param {Node} child The child

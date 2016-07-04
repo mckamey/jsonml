@@ -11,6 +11,10 @@
 
 var JsonML = JsonML || {};
 
+if (typeof module === 'object') {
+	module.exports = JsonML;
+}
+
 (function(JsonML, document){
 	'use strict';
 
@@ -79,7 +83,7 @@ var JsonML = JsonML || {};
 								// deprecated
 								child = elem.document;
 							}
-	
+
 							child = fromHTML(child, filter);
 							if (child) {
 								jml.push(child);
