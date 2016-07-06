@@ -62,12 +62,16 @@
 
 var JsonML = JsonML || {};
 
+if (typeof module === 'object') {
+	module.exports = JsonML;
+}
+
 (function(JsonML, document) {
 	'use strict';
 
 	/**
 	 * Attribute name map
-	 * 
+	 *
 	 * @private
 	 * @constant
 	 * @type {Object.<string>}
@@ -99,7 +103,7 @@ var JsonML = JsonML || {};
 
 	/**
 	 * Attribute duplicates map
-	 * 
+	 *
 	 * @private
 	 * @constant
 	 * @type {Object.<string>}
@@ -112,7 +116,7 @@ var JsonML = JsonML || {};
 
 	/**
 	 * Attributes to be set via DOM
-	 * 
+	 *
 	 * @private
 	 * @constant
 	 * @type {Object.<number>}
@@ -126,7 +130,7 @@ var JsonML = JsonML || {};
 
 	/**
 	 * Boolean attribute map
-	 * 
+	 *
 	 * @private
 	 * @constant
 	 * @type {Object.<number>}
@@ -153,7 +157,7 @@ var JsonML = JsonML || {};
 
 	/**
 	 * Leading SGML line ending pattern
-	 * 
+	 *
 	 * @private
 	 * @constant
 	 * @type {RegExp}
@@ -162,7 +166,7 @@ var JsonML = JsonML || {};
 
 	/**
 	 * Trailing SGML line ending pattern
-	 * 
+	 *
 	 * @private
 	 * @constant
 	 * @type {RegExp}
@@ -213,7 +217,7 @@ var JsonML = JsonML || {};
 
 	/**
 	 * Wraps a data value to maintain as raw markup in output
-	 * 
+	 *
 	 * @private
 	 * @this {Markup}
 	 * @param {string} value The value
@@ -230,7 +234,7 @@ var JsonML = JsonML || {};
 
 	/**
 	 * Renders the value
-	 * 
+	 *
 	 * @public
 	 * @override
 	 * @this {Markup}
@@ -258,7 +262,7 @@ var JsonML = JsonML || {};
 
 	/**
 	 * Determines if the value is an Array
-	 * 
+	 *
 	 * @private
 	 * @param {*} val the object being tested
 	 * @return {boolean}
@@ -269,7 +273,7 @@ var JsonML = JsonML || {};
 
 	/**
 	 * Determines if the value is a function
-	 * 
+	 *
 	 * @private
 	 * @param {*} val the object being tested
 	 * @return {boolean}
@@ -280,7 +284,7 @@ var JsonML = JsonML || {};
 
 	/**
 	 * Determines the type of the value
-	 * 
+	 *
 	 * @private
 	 * @param {*} val the object being tested
 	 * @return {number}
@@ -299,8 +303,8 @@ var JsonML = JsonML || {};
 	}
 
 	/**
-	 * Creates a DOM element 
-	 * 
+	 * Creates a DOM element
+	 *
 	 * @private
 	 * @param {string} tag The element's tag name
 	 * @return {Node}
@@ -328,7 +332,7 @@ var JsonML = JsonML || {};
 
 	/**
 	 * Adds an event handler to an element
-	 * 
+	 *
 	 * @private
 	 * @param {Node} elem The element
 	 * @param {string} name The event name
@@ -370,7 +374,7 @@ var JsonML = JsonML || {};
 
 	/**
 	 * Appends an attribute to an element
-	 * 
+	 *
 	 * @private
 	 * @param {Node} elem The element
 	 * @param {Object} attr Attributes object
@@ -461,7 +465,7 @@ var JsonML = JsonML || {};
 
 	/**
 	 * Appends a child to an element
-	 * 
+	 *
 	 * @private
 	 * @param {Node} elem The parent element
 	 * @param {Node} child The child
@@ -522,7 +526,7 @@ var JsonML = JsonML || {};
 
 	/**
 	 * Tests a node for whitespace
-	 * 
+	 *
 	 * @private
 	 * @param {Node} node The node
 	 * @return {boolean}
@@ -533,7 +537,7 @@ var JsonML = JsonML || {};
 
 	/**
 	 * Trims whitespace pattern from the text node
-	 * 
+	 *
 	 * @private
 	 * @param {Node} node The node
 	 */
@@ -545,7 +549,7 @@ var JsonML = JsonML || {};
 
 	/**
 	 * Removes leading and trailing whitespace nodes
-	 * 
+	 *
 	 * @private
 	 * @param {Node} elem The node
 	 */
@@ -568,7 +572,7 @@ var JsonML = JsonML || {};
 
 	/**
 	 * Converts the markup to DOM nodes
-	 * 
+	 *
 	 * @private
 	 * @param {string|Markup} value The node
 	 * @return {Node}
@@ -576,7 +580,7 @@ var JsonML = JsonML || {};
 	var toDOM = function(value) {
 		var wrapper = createElement('div');
 		wrapper.innerHTML = ''+value;
-	
+
 		// trim extraneous whitespace
 		trimWhitespace(wrapper);
 

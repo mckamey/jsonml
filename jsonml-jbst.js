@@ -56,6 +56,10 @@
 /* namespace JsonML */
 var JsonML = JsonML || {};
 
+if (typeof module === 'object') {
+	module.exports = JsonML;
+}
+
 JsonML.BST = (function(){
 	'use strict';
 

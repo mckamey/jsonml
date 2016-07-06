@@ -43,6 +43,10 @@
 
 var JsonML = JsonML || {};
 
+if (typeof module === 'object') {
+	module.exports = JsonML;
+}
+
 (function(JsonML) {
 	'use strict';
 
@@ -50,7 +54,7 @@ var JsonML = JsonML || {};
 
 	/**
 	 * Determines if the value is an Array
-	 * 
+	 *
 	 * @private
 	 * @param {*} val the object being tested
 	 * @return {boolean}
