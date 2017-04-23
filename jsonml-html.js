@@ -140,6 +140,7 @@ if (typeof module === 'object') {
 		'autofocus': 1,
 		'checked': 1,
 		'defaultchecked': 1,
+		'defaultselected': 1,
 		'defer': 1,
 		'disabled': 1,
 		'formnovalidate': 1,
@@ -150,6 +151,7 @@ if (typeof module === 'object') {
 		'novalidate': 1,
 		'readonly': 1,
 		'required': 1,
+		'selected': 1,
 		'spellcheck': 1,
 		'willvalidate': 1
 		// can add more attributes here as needed
