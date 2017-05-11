@@ -375,7 +375,7 @@ if (typeof module === 'object') {
 	 */
 	JsonML.fromXMLText = function(xmlText, filter) {
 		var elem = parseXML(xmlText);
-		elem = elem && (elem.ownerDocument || elem).documentElement;
+		elem = elem && (elem.ownerDocument || elem);
 
 		return fromXML(elem, filter);
 	};
