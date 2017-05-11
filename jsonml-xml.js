@@ -62,6 +62,8 @@ if (typeof module === 'object') {
 
 		} else if (tag.charAt(0) === '!') {
 			return document.createComment(tag === '!' ? '' : tag.substr(1)+' ');
+		} else if (tag.charAt(0) === '?') {
+			return document.createProcessingInstruction(tag === '!' ? '' : tag.substr(1), '');
 		}
 
 		return document.createElement(tag);
@@ -99,7 +101,8 @@ if (typeof module === 'object') {
 				if (child.nodeType === 3) { // text node
 					elem.nodeValue += child.nodeValue;
 				}
-
+			} else if (elem.nodeType === 7) {
+				elem.data = child.data;
 			} else if (elem.canHaveChildren !== false) {
 				elem.appendChild(child);
 			}
@@ -264,6 +267,17 @@ if (typeof module === 'object') {
 				// free references
 				elem = null;
 				return str;
+			case 7: // ProcessingInstruction node
+				var jml = ['?'+elem.target, elem.data]
+
+				// filter result
+				if ('function' === typeof filter) {
+					jml = filter(jml, elem);
+				}
+
+				// free references
+				elem = null;
+				return jml;
 			case 10: // doctype
 				jml = ['!'];
 
