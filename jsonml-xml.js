@@ -253,6 +253,10 @@ if (typeof module === 'object') {
 
 				addChildren(elem, filter, jml);
 
+				if (jml[0] === '' && jml.length === 2) {
+					jml = jml[1]
+				}
+
 				// filter result
 				if ('function' === typeof filter) {
 					jml = filter(jml, elem);
