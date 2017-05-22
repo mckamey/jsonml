@@ -84,9 +84,38 @@ if (typeof module === 'object') {
 	 * @return {boolean}
 	 */
 	var isElement = JsonML.isElement = function(jml) {
-		return isArray(jml) && ('string' === typeof jml[0]);
+		return isArray(jml) && ('string' === typeof jml[0]) && (jml[0].charAt(0) !== '?');
 	};
 
+	/**
+	 * @param {*} jml
+	 * @return {boolean}
+	 */
+	var isProcessingInstruction = JsonML.isProcessingInstruction = function(jml) {
+		return isArray(jml) && ('string' === typeof jml[0]) && (jml[0].charAt(0) === '?');
+	};
+
+	/**
+	 * @param {*} jml
+	 * @return {string}
+	 */
+	var getTarget = JsonML.getTarget = function(jml) {
+		if (!isProcessingInstruction(jml)) {
+			throw new SyntaxError('invalid JsonML');
+		}
+		return jml[0].substring(1);
+	};
+
+	/**
+	 * @param {*} jml
+	 * @return {string}
+	 */
+	var getData = JsonML.getData = function(jml) {
+		if (!isProcessingInstruction(jml)) {
+			throw new SyntaxError('invalid JsonML');
+		}
+		return jml[1];
+	};
 	/**
 	 * @param {*} jml
 	 * @return {boolean}
@@ -196,7 +225,7 @@ if (typeof module === 'object') {
 
 		} else if (child && 'object' === typeof child) {
 			if (isArray(child)) {
-				if (!isElement(child)) {
+				if (!isElement(child) && !isProcessingInstruction(child)) {
 					throw new SyntaxError('invalid JsonML');
 				}
 

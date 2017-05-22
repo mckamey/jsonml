@@ -340,4 +340,21 @@ test('JsonML.fromXMLText/.toXMLText roundtrip, comments', function() {
 	same(actual, expected);
 });
 
+test('JsonML.fromXMLText/.toXMLText roundtrip, processing instructions', function() {
+
+	var expected =
+		'<?some-pi and its data?>' +
+		'<foo>' +
+			'<?another-pi with data?>' +
+		'</foo>';
+
+	// JsonML will strip the XML Declaration
+	var input = '<?xml version="1.0"?>' + expected;
+
+	var jml = JsonML.fromXMLText(input);
+	var actual = JsonML.toXMLText(jml);
+
+	same(actual, expected);
+});
+
 }catch(ex){alert(ex);}
